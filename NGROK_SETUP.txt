@@ -1,0 +1,40 @@
+═══════════════════════════════════════════
+  EthiHack — ngrok Setup (5 minutes)
+═══════════════════════════════════════════
+
+STEP 1 — Download ngrok
+  Go to: https://ngrok.com/download
+  Download for Windows (it's a single .exe file)
+  Put ngrok.exe in: C:\Users\Your Name\Desktop\ethihack\
+
+STEP 2 — Get free account
+  Go to: https://dashboard.ngrok.com/signup
+  Sign up free (takes 30 seconds)
+
+STEP 3 — Connect your account
+  After signup, copy your authtoken from:
+  https://dashboard.ngrok.com/get-started/your-authtoken
+
+  Run this once in CMD:
+  ngrok config add-authtoken YOUR_TOKEN_HERE
+
+STEP 4 — Launch EthiHack + ngrok together
+  Double-click: start_ngrok.bat
+
+  It will:
+  - Install all packages
+  - Start EthiHack on port 8000
+  - Open ngrok tunnel
+  - Show you a URL like: https://abc123.ngrok-free.app
+
+STEP 5 — Share the URL
+  Copy the https://xxxxx.ngrok-free.app URL
+  Anyone in the world can now use EthiHack from that URL
+  Perfect for competition demos!
+
+═══════════════════════════════════════════
+  COMPETITION TIP:
+  When demoing, open the ngrok URL on your
+  phone AND laptop at the same time to show
+  it works from anywhere.
+═══════════════════════════════════════════
