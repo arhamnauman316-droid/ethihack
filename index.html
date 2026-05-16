@@ -1100,10 +1100,7 @@ function loadDemo(){
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/chat';
   document.getElementById('tModel').value = '';
-  const b = document.querySelectorAll('.btn-demo')[0];
-  b.textContent = '✅ Chatbot Demo Loaded!';
-  b.style.borderColor = '#2ea043'; b.style.color = '#2ea043';
-  setTimeout(()=>{b.textContent='🎯 Demo: Chatbot';b.style.borderColor='#58a6ff';b.style.color='#58a6ff';}, 2000);
+  setTimeout(()=>{ startScan(); }, 300);
 }
 
 function loadAgentDemo(){
@@ -1114,7 +1111,7 @@ function loadAgentDemo(){
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/agent/chat';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
-  flashBtn(1, '✅ Agent Loaded!', '🤖 AI Agent (Tools)', '#f85149');
+  setTimeout(()=>{ startScan(); }, 300);
 }
 
 function loadRagDemo(){
@@ -1125,7 +1122,7 @@ function loadRagDemo(){
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/rag/chat';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
-  flashBtn(2, '✅ RAG Demo Loaded!', '🧠 RAG System', '#d29922');
+  setTimeout(()=>{ startScan(); }, 300);
 }
 
 function loadOrchestratorDemo(){
@@ -1136,7 +1133,7 @@ function loadOrchestratorDemo(){
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/orchestrator/chat';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
-  flashBtn(3, '✅ Pipeline Loaded!', '🔀 Multi-Agent Pipeline', '#bc8cff');
+  setTimeout(()=>{ startScan(); }, 300);
 }
 
 function loadHardenedDemo(){
@@ -1146,7 +1143,7 @@ function loadHardenedDemo(){
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/hardened/chat';
   document.getElementById('tModel').value = '';
-  flashBtn(4, '✅ Hardened Demo Loaded!', '🛡️ Hardened AI (Secure)', '#2ea043');
+  setTimeout(()=>{ startScan(); }, 300);
 }
 
 function flashBtn(idx, onText, offText, col){
