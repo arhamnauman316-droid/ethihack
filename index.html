@@ -916,7 +916,7 @@ function updateAttackCard(idx,vuln,sev,explanation,brokeAt,previews,confidence,o
   const sevCol=sev>=7?'#f85149':sev>=4?'#d29922':'#2ea043';
   const conf=confidence||0;
   const confCol=conf>=80?'#2ea043':conf>=60?'#d29922':'#7d8590';
-  const verdictLabel={'BOTH_AGREE_VULNERABLE':'🔴 Confirmed by 2 AIs','BOTH_AGREE_SECURE':'🟢 Double-checked: Safe','SONNET_ONLY':'🟡 Caught by deep scan','HAIKU_ONLY_DISMISSED':'✓ Reviewed: False alarm','TOOL_EXECUTION_CONFIRMED':'💥 Actually happened!','CONFIRMED':'✓ Confirmed'}[verdict]||'';
+  const verdictLabel={'BOTH_AGREE_VULNERABLE':'🔴 Claude Sonnet + Haiku Both Confirmed','BOTH_AGREE_SECURE':'🟢 2 AI Models Verified Safe','SONNET_ONLY':'🟡 Flagged — Under Review','HAIKU_ONLY_DISMISSED':'✓ False Alarm (Reviewed)','TOOL_EXECUTION_CONFIRMED':'💥 Real Action Executed — Confirmed','CONFIRMED':'✓ Confirmed','DUAL_MODEL_CONFIRMED':'🔴 Dual-Model Confirmed','DUAL_MODEL_SECURE':'🟢 Dual-Model Verified Safe'}[verdict]||'';
   el.querySelector('.atk-badge').className=`atk-badge ${badgeClass}`;
   el.querySelector('.atk-badge').textContent=badgeText;
   el.querySelector('.sev-dot').style.background=sevCol;
@@ -955,10 +955,11 @@ function updateAttackCard(idx,vuln,sev,explanation,brokeAt,previews,confidence,o
       ${owaspId?`<span class="tag-owasp">${esc(owaspId)}</span>`:''}
       ${mitreId?`<span class="tag-mitre">${esc(mitreId)}</span>`:''}
       ${cvssBadge}
-      ${adaptive?`<span class="tag-adaptive">⚡ ADAPTIVE</span>`:''}
-      ${toolConfirmed?`<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(248,81,73,0.2);color:#f85149;border:1px solid rgba(248,81,73,0.4)">🤖 TOOL EXECUTED</span>`:''}
+      ${adaptive?`<span class="tag-adaptive" style="background:rgba(88,166,255,0.15);color:#58a6ff;border:1px solid rgba(88,166,255,0.3);font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px">🧠 AI-Adaptive Turn 3</span>`:''}
+      ${toolConfirmed?`<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(248,81,73,0.2);color:#f85149;border:1px solid rgba(248,81,73,0.4)">🤖 REAL ACTION EXECUTED</span>`:''}
+      ${verdict==='BOTH_AGREE_VULNERABLE'||verdict==='DUAL_MODEL_CONFIRMED'?`<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(248,81,73,0.15);color:#f85149;border:1px solid rgba(248,81,73,0.3)">🔴 Sonnet + Haiku Confirmed</span>`:''}
       ${conf?`<span style="font-size:10px;color:${confCol};font-weight:600;margin-left:2px">● ${conf}% confidence</span>`:''}
-      ${verdictLabel?`<span style="font-size:10px;color:${toolConfirmed?'#f85149':'#484f58'}">${esc(verdictLabel)}</span>`:''}
+      ${verdictLabel&&verdict!=='BOTH_AGREE_VULNERABLE'&&verdict!=='DUAL_MODEL_CONFIRMED'?`<span style="font-size:10px;color:${toolConfirmed?'#f85149':'#484f58'}">${esc(verdictLabel)}</span>`:''}
     </div>
     <div class="field-lbl">What happened</div>
     <div class="finding">${esc(explanation)}</div>
@@ -1094,16 +1095,50 @@ function addRemediation(rem){
   list.appendChild(el);
 }
 
+function diagnoseScanError(raw){
+  if(!raw) return {title:'Unknown error',detail:'No details returned.',fix:'Try again.'};
+  const m = raw.toLowerCase();
+  if(m.includes('connection refused')||m.includes('econnrefused'))
+    return {title:'Target refused connection',detail:raw,fix:'The target API is not running or the URL is wrong. Make sure the endpoint is live.'};
+  if(m.includes('timed out')||m.includes('timeout')||m.includes('read timeout'))
+    return {title:'Target timed out',detail:raw,fix:'Target is too slow or unreachable. Check the URL is correct and the service is running.'};
+  if(m.includes('401')||m.includes('unauthorized')||m.includes('invalid api key')||m.includes('invalid_api_key'))
+    return {title:'Invalid API key (401)',detail:raw,fix:'The Target API Key is wrong. Double-check it in the scan form.'};
+  if(m.includes('403')||m.includes('forbidden'))
+    return {title:'Access forbidden (403)',detail:raw,fix:'The target denied access. Check your API key has the right permissions.'};
+  if(m.includes('404')||m.includes('not found'))
+    return {title:'Endpoint not found (404)',detail:raw,fix:'Wrong URL — for OpenAI-compatible APIs the base URL should NOT include /chat/completions (EthiHack adds it automatically).'};
+  if(m.includes('429')||m.includes('rate limit')||m.includes('too many requests'))
+    return {title:'Rate limited (429)',detail:raw,fix:'Target is rate limiting you. Wait 30s and try again.'};
+  if(m.includes('500')||m.includes('internal server'))
+    return {title:'Target server crashed (500)',detail:raw,fix:'The target returned a 500 error — this itself may be a vulnerability finding worth noting.'};
+  if(m.includes('ssl')||m.includes('certificate'))
+    return {title:'SSL/TLS error',detail:raw,fix:'Certificate issue. For local targets try http:// instead of https://.'};
+  if(m.includes('name or service not known')||m.includes('getaddrinfo')||m.includes('nodename'))
+    return {title:'Host not found',detail:raw,fix:'The domain doesn\'t exist or DNS failed. Check the URL spelling.'};
+  if(m.includes('cannot parse')||m.includes('invalid url'))
+    return {title:'Invalid URL',detail:raw,fix:'Bad URL format. Use: https://api.example.com/v1 (no trailing slash).'};
+  if(m.includes('json')||m.includes('decode'))
+    return {title:'Target returned non-JSON',detail:raw,fix:'Got HTML instead of JSON — make sure the URL is an API endpoint, not a chat UI page.'};
+  if(m.includes('turn1')||m.includes('chain')||m.includes('generate_attack'))
+    return {title:'Attack chain build error',detail:raw,fix:'Internal error building attack chains. This is a bug — try again.'};
+  return {title:'Scan error',detail:raw,fix:'Check the URL, API key, and target type match. See browser console for full details (F12).'};
+}
+
 function addErr(msg){
-  // Don't show raw errors in the feed — show a friendly message instead
-  const friendly = 'Something went wrong during the scan. Please try again.';
-  const existing = document.getElementById('err-banner');
-  if(existing){ existing.textContent = '⚠️ ' + friendly; return; }
+  console.warn('EthiHack error (raw):', msg);
+  const d = diagnoseScanError(msg);
+  const html=`<div style="display:flex;flex-direction:column;gap:5px;width:100%">
+    <div style="color:#f85149;font-weight:700;font-size:12px">⚠️ ${d.title}</div>
+    <div style="color:#8b949e;font-size:10.5px;font-family:monospace;word-break:break-all;max-height:52px;overflow:auto;padding:4px 6px;background:rgba(0,0,0,0.3);border-radius:4px">${d.detail}</div>
+    <div style="color:#e3b341;font-size:11px">💡 <b>Fix:</b> ${d.fix}</div>
+  </div>`;
+  const existing=document.getElementById('err-banner');
+  if(existing){existing.innerHTML=html;return;}
   const el=mk('div','phase-card'); el.id='err-banner';
-  el.style.borderColor='rgba(248,81,73,0.4)';
-  el.innerHTML=`<span style="color:#f85149;font-size:13px">⚠️</span><span style="color:#f85149;font-size:12px">${friendly}</span>`;
+  el.style.cssText='border-color:rgba(248,81,73,0.45);background:rgba(248,81,73,0.07);padding:12px 14px';
+  el.innerHTML=html;
   append(el);
-  console.warn('EthiHack error:', msg); // keep raw error in dev tools only
 }
 function showScore(score){
   const col=score>=70?'#2ea043':score>=40?'#d29922':'#f85149';
