@@ -625,7 +625,13 @@ select option{background:#111820}
   <!-- Center: Feed -->
   <main class="main">
     <div class="feed-header">
-      <div class="feed-title" id="feedTitle">Security Test Results</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="feed-title" id="feedTitle">Security Test Results</div>
+        <div id="feedControls" style="display:none;gap:6px;display:none">
+          <button onclick="expandAllVulns()" style="font-size:10px;padding:3px 9px;background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);border-radius:5px;color:#f85149;cursor:pointer">Show All Issues</button>
+          <button onclick="collapseAll()" style="font-size:10px;padding:3px 9px;background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.3);border-radius:5px;color:#58a6ff;cursor:pointer">Collapse All</button>
+        </div>
+      </div>
       <div class="score-wrap" id="scoreWrap">
         <div>
           <div style="font-size:10px;color:#7d8590">Safety Score</div>
@@ -758,6 +764,7 @@ function startScan(){
   }
   if(es){es.close();es=null;}
   nodes=[];
+  bbScanResults = {_vulnList: []};
   setBtnLoading(true);
   document.getElementById('scoreWrap').style.display='none';
   document.getElementById('fpCard').style.display='none';
@@ -819,8 +826,8 @@ function stream(id){
     }
 
     if(d.type==='attack_result'){
-      // Collect for BB report
-      if(d.vulnerable && bbScanResults){
+      // Collect for BB report — always push, bbScanResults is initialized in startScan
+      if(d.vulnerable){
         if(!bbScanResults._vulnList) bbScanResults._vulnList = [];
         bbScanResults._vulnList.push({
           name: d.name||'', owasp: d.owasp_id||'', mitre: d.mitre_id||'',
@@ -828,6 +835,7 @@ function stream(id){
           bizRisk: d.business_impact||'', cvss: d.cvss&&d.cvss.vector||'',
           cvssScore: d.cvss&&d.cvss.score||0,
           turn1: d.turns&&d.turns[0]||'', turn2: d.turns&&d.turns[1]||'', turn3: d.turns&&d.turns[2]||'',
+          response1: d.turn_previews&&d.turn_previews[0]||'', response2: d.turn_previews&&d.turn_previews[1]||'',
           payload: d.turns&&d.turns[0]||''
         });
       }
@@ -848,9 +856,10 @@ function stream(id){
     if(d.type==='complete'){
       setProgress(100);
       document.getElementById('liveScanCounter').style.display='none';
-      // Store for bug bounty report
+      // Preserve accumulated vuln list, then merge with complete event data
+      const savedVulns = bbScanResults._vulnList || [];
       bbScanResults = d;
-      bbScanResults._vulnList = [];
+      bbScanResults._vulnList = savedVulns;
       showComplete(d.score,d.total,d.vulnerabilities,d.remediations,d.high_confidence_vulns,d.owasp_covered,d.tool_confirmed_vulns,d.tools_triggered,d.agent_mode,d.scan_id);
       showScore(d.score);
       setBtnLoading(false); es.close();
@@ -964,9 +973,12 @@ function updateAttackCard(idx,vuln,sev,explanation,brokeAt,previews,confidence,o
     <div class="field-lbl" style="margin-top:8px">AI responses during the test</div>
     <div class="turn-grid">${turnHtml}</div>
     ${buildToolCallsHtml(previews, toolActions)}`;
-  if(vuln){el.classList.add('open');}
+  // Vulnerable cards: highlight with a red left-border but stay collapsed (judges can click to expand)
+  if(vuln){ el.style.borderLeft='3px solid #f85149'; }
 }
 function toggle(idx){document.getElementById(`atk-${idx}`)?.classList.toggle('open');}
+function expandAllVulns(){document.querySelectorAll('.attack-card.vuln').forEach(c=>c.classList.add('open'));}
+function collapseAll(){document.querySelectorAll('.attack-card').forEach(c=>c.classList.remove('open'));}
 
 function buildToolCallsHtml(previews, toolActions){
   const toolIcons = {web_search:'🔍',web_fetch:'🌐',send_email:'📧',query_database:'🗄️',execute_code:'💻',call_api:'🔗',read_file:'📄',update_record:'✏️',update_memory:'🧠'};
@@ -1003,6 +1015,9 @@ function buildToolCallsHtml(previews, toolActions){
 }
 
 function showComplete(score,total,vulns,rems,highConf,owaspCovered,toolConfirmed,toolsTriggered,agentMode,completeScanId){
+  // Show expand/collapse controls now that scan is done
+  const fc=document.getElementById('feedControls');
+  if(fc){ fc.style.display='flex'; }
   const remsCount = rems||0;
   const hc = highConf||0;
   const oc = owaspCovered||0;
@@ -1652,31 +1667,37 @@ function buildBBReports(data) {
 
   // ── PoC + CVSS ──
   var poc = vulns.length > 0 ?
+    '<div style="margin-bottom:12px;padding:10px 12px;background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.15);border-radius:8px;font-size:11px;color:#8b949e">Copy each finding below directly into your bug bounty submission. Each includes the exact attack payload, AI response, and CVSS score.</div>' +
     vulns.map(function(v, i) {
       var cs = v.cvssScore > 0 ? v.cvssScore : (v.sev >= 7 ? (v.sev * 1.0).toFixed(1) : (v.sev * 0.85).toFixed(1));
+      var sevRgb = v.sev>=8?'248,81,73':v.sev>=5?'210,153,34':'46,160,67';
       return '<div class="bb-vuln-card">' +
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e2a38">' +
         '<span style="font-size:13px;font-weight:700;color:#e6edf3">Finding #' + (i+1) + ': ' + v.name + '</span>' +
-        '<span class="bb-sev-badge" style="background:rgba(' + (v.sev>=8?'248,81,73':v.sev>=5?'210,153,34':'46,160,67') + ',0.15);color:' + sev2col(v.sev) + ';margin-left:auto">' + sev2label(v.sev) + '</span></div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">' +
-        '<div><div class="bb-label">OWASP ID</div><div class="bb-value" style="color:#58a6ff">' + (v.owasp||'LLM01') + '</div></div>' +
-        '<div><div class="bb-label">MITRE</div><div class="bb-value" style="color:#d29922">' + (v.mitre||'AML.T0051') + '</div></div>' +
-        '<div><div class="bb-label">CVSS Score</div><div class="bb-value" style="color:' + sev2col(v.sev) + ';font-weight:700">' + cs + ' / 10</div></div></div>' +
-        '<div class="bb-field"><div class="bb-label">Finding</div><div class="bb-value">' + (v.explanation||'Security control bypassed.') + '</div></div>' +
-        '<div class="bb-field"><div class="bb-label">Attack Payload (Turn 1)</div><div class="bb-payload">' + (v.turn1||v.payload||'[See scan logs]') + '</div></div>' +
-        (v.turn2 ? '<div class="bb-field"><div class="bb-label">Escalation (Turn 2)</div><div class="bb-payload">' + v.turn2 + '</div></div>' : '') +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">' +
-        '<div class="bb-field"><div class="bb-label">Expected</div><div class="bb-value" style="color:#2ea043">AI refuses the request</div></div>' +
-        '<div class="bb-field"><div class="bb-label">Business Risk</div><div class="bb-value" style="color:#d29922">' + (v.bizRisk||'Unauthorized access / data exposure') + '</div></div></div>' +
+        '<span class="bb-sev-badge" style="background:rgba(' + sevRgb + ',0.15);color:' + sev2col(v.sev) + ';margin-left:auto">' + sev2label(v.sev) + '</span></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px">' +
+        '<div><div class="bb-label">OWASP ID</div><div class="bb-value" style="color:#58a6ff;font-weight:700">' + (v.owasp||'LLM01') + '</div></div>' +
+        '<div><div class="bb-label">MITRE ATT&amp;CK</div><div class="bb-value" style="color:#d29922">' + (v.mitre||'AML.T0051') + '</div></div>' +
+        '<div><div class="bb-label">CVSS Score</div><div class="bb-value" style="color:' + sev2col(v.sev) + ';font-weight:700">' + cs + ' — ' + sev2label(v.sev) + '</div></div>' +
+        '<div><div class="bb-label">Severity</div><div class="bb-value">' + v.sev + ' / 10</div></div></div>' +
+        '<div class="bb-field"><div class="bb-label">&#10003; Expected Behavior</div><div class="bb-value" style="color:#2ea043">AI refuses, declines, or ignores the attack payload</div></div>' +
+        '<div class="bb-field"><div class="bb-label">&#10007; Actual Behavior (What Went Wrong)</div><div class="bb-value" style="color:#f85149">' + (v.explanation||'Security control bypassed.') + '</div></div>' +
+        '<div class="bb-field"><div class="bb-label">&#128165; Business Impact</div><div class="bb-value" style="color:#d29922">' + (v.bizRisk||'Unauthorized access / data exposure') + '</div></div>' +
+        '<div class="bb-section" style="margin-top:4px"><div class="bb-section-title">Steps to Reproduce</div>' +
+        '<div class="bb-field"><div class="bb-label">Step 1 — Send this message to the AI</div><div class="bb-payload">' + (v.turn1||v.payload||'[Attack payload — see scan logs]') + '</div></div>' +
+        (v.turn2 ? '<div class="bb-field"><div class="bb-label">Step 2 — Follow up with this escalation</div><div class="bb-payload">' + v.turn2 + '</div></div>' : '') +
+        (v.response1 ? '<div class="bb-field"><div class="bb-label">AI Response (evidence)</div><div class="bb-payload" style="background:rgba(248,81,73,0.05);border-color:rgba(248,81,73,0.2);color:#c9d1d9">' + v.response1.substring(0,400) + (v.response1.length>400?'...':'') + '</div></div>' : '') +
+        '</div>' +
+        (v.cvss ? '<div style="font-size:9px;color:#484f58;margin-top:8px;font-family:monospace">' + v.cvss + '</div>' : '') +
         '</div>';
     }).join('') :
-    '<div class="bb-section" style="text-align:center;border-color:rgba(46,160,67,0.3)"><div style="font-size:24px;margin-bottom:8px">🛡️</div><div style="color:#2ea043;font-weight:700">No vulnerabilities found</div><div style="color:#7d8590;margin-top:4px;font-size:12px">This AI appears secure against all 20 OWASP LLM Top 10 attack chains.</div></div>';
+    '<div class="bb-section" style="text-align:center;border-color:rgba(46,160,67,0.3)"><div style="font-size:24px;margin-bottom:8px">&#128737;&#65039;</div><div style="color:#2ea043;font-weight:700">No vulnerabilities found</div><div style="color:#7d8590;margin-top:4px;font-size:12px">This AI appears secure against all OWASP LLM Top 10 attack chains.</div></div>';
 
   document.getElementById('bb-content-h1').innerHTML = h1;
   document.getElementById('bb-content-bc').innerHTML = bc;
   document.getElementById('bb-content-disc').innerHTML = disc;
   document.getElementById('bb-content-poc').innerHTML = poc;
-  switchBBTab('h1');
+  switchBBTab('poc');
 }
 
 document.getElementById('bbModal').addEventListener('click', function(e) {

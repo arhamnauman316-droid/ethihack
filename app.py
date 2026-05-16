@@ -320,7 +320,7 @@ async def run_in_executor(client, **kwargs):
 
 async def send_msg(url, message, api_key, target_type, history=None, target_model=""):
     try:
-        async with httpx.AsyncClient(timeout=12.0) as c:
+        async with httpx.AsyncClient(timeout=7.0) as c:
 
             # ── OpenAI-compatible APIs (OpenAI, Groq, Together, Ollama, LM Studio) ──
             if target_type in ("openai", "groq", "together", "ollama", "lmstudio"):
@@ -1560,4 +1560,3 @@ async def test_key(body: dict):
         return {"valid": True, "model": resp.model}
     except Exception as e:
         return {"valid": False, "error": str(e)[:200]}
-                                                                              
