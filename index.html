@@ -526,8 +526,8 @@ select option{background:#111820}
       </div>
       <div class="form-group">
         <select id="tType" onchange="onTypeChange()">
-          <option value="openai">ChatGPT / OpenAI (most common)</option>
-          <option value="anthropic">Claude by Anthropic</option>
+          <option value="openai">ChatGPT / OpenAI</option>
+          <option value="anthropic" selected>Claude by Anthropic</option>
           <option value="gemini">Google Gemini</option>
           <option value="groq">Groq — Free &amp; Fast</option>
           <option value="together">Together AI</option>
@@ -548,18 +548,6 @@ select option{background:#111820}
         <label>Model version <span style="color:#484f58;font-weight:400;font-size:10px">(leave blank if unsure)</span></label>
         <input id="tModel" placeholder="e.g. gpt-3.5-turbo">
         <div class="hint" id="modelHint"></div>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="width:20px;height:20px;border-radius:50%;background:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0d1117;flex-shrink:0">3</div>
-        <div style="font-size:11px;font-weight:700;color:#e6edf3">Enter the API Key</div>
-      </div>
-      <div class="form-group">
-        <input type="password" id="tKey" placeholder="Paste your API key here (e.g. sk-...)">
-        <div class="hint" id="keyHint">This lets EthiHack send test messages to your AI. It's never stored.</div>
       </div>
     </div>
 
@@ -742,11 +730,11 @@ function updateNode(index, vulnerable){if(nodes[index])nodes[index].status=vulne
 
 // ── Scan ──────────────────────────────────────────────────────────────────
 function startScan(){
-  const tName=v('tName'),tDesc=v('tDesc'),tType=v('tType'),tUrl=v('tUrl'),tKey=v('tKey'),aKey=v('aKey'),tModel=v('tModel');
+  const tName=v('tName'),tDesc=v('tDesc'),tType=v('tType'),tUrl=v('tUrl'),aKey=v('aKey'),tModel=v('tModel'); const tKey='';
   // URL not required for auto-routed types
   const autoRouted = ['groq','together','ollama','lmstudio','anthropic','gemini','cohere'];
-  if(!tName||(!autoRouted.includes(tType)&&!tUrl)){
-    alert('Fill in Target Name and URL (if needed).');return;
+  if(!tName){
+    alert('Please enter a name for the AI you want to test.');return;
   }
   if(es){es.close();es=null;}
   nodes=[];
@@ -1067,7 +1055,7 @@ function dlReport(e){e.preventDefault();if(scanId)window.open(`/api/report/${sca
 
 // ── Target Type Smart Fill ─────────────────────────────────────────────────
 const TYPE_INFO = {
-  openai:    {url:'https://api.openai.com/v1', urlHint:'OpenAI base URL', model:'gpt-3.5-turbo', modelHint:'gpt-4, gpt-4o, gpt-3.5-turbo', keyHint:'sk-... from platform.openai.com', showUrl:true},
+  openai:    {url:'https://api.openai.com/v1', urlHint:'', model:'gpt-3.5-turbo', modelHint:'gpt-4, gpt-4o, gpt-3.5-turbo', keyHint:'sk-... from platform.openai.com', showUrl:false},
   groq:      {url:'https://api.groq.com/openai/v1', urlHint:'Auto-filled', model:'llama3-8b-8192', modelHint:'llama3-8b-8192, llama3-70b, mixtral-8x7b-32768', keyHint:'gsk_... from console.groq.com (FREE)', showUrl:false},
   anthropic: {url:'https://api.anthropic.com/v1/messages', urlHint:'Auto-routed', model:'claude-haiku-4-5-20251001', modelHint:'claude-haiku-4-5-20251001, claude-sonnet-4-6, claude-opus-4-6', keyHint:'sk-ant-... from console.anthropic.com', showUrl:false},
   gemini:    {url:'auto', urlHint:'Auto-routed', model:'gemini-1.5-flash', modelHint:'gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash', keyHint:'AIza... from aistudio.google.com (FREE)', showUrl:false},
@@ -1098,7 +1086,7 @@ function onTypeChange(){
   modelInput.value = '';
   document.getElementById('urlHint').textContent = info.urlHint || '';
   document.getElementById('modelHint').textContent = 'Default: ' + (info.modelHint || '');
-  document.getElementById('keyHint').textContent = info.keyHint || '';
+  
 }
 
 // init hints on load
@@ -1111,7 +1099,6 @@ function loadDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   const b = document.querySelectorAll('.btn-demo')[0];
   b.textContent = '✅ Chatbot Demo Loaded!';
@@ -1125,7 +1112,6 @@ function loadAgentDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/agent/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
   flashBtn(1, '✅ Agent Loaded!', '🤖 AI Agent (Tools)', '#f85149');
@@ -1137,7 +1123,6 @@ function loadRagDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/rag/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
   flashBtn(2, '✅ RAG Demo Loaded!', '🧠 RAG System', '#d29922');
@@ -1149,7 +1134,6 @@ function loadOrchestratorDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/orchestrator/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
   flashBtn(3, '✅ Pipeline Loaded!', '🔀 Multi-Agent Pipeline', '#bc8cff');
@@ -1161,7 +1145,6 @@ function loadHardenedDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/hardened/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   flashBtn(4, '✅ Hardened Demo Loaded!', '🛡️ Hardened AI (Secure)', '#2ea043');
 }
@@ -1174,30 +1157,6 @@ function flashBtn(idx, onText, offText, col){
   setTimeout(()=>{btns[idx].textContent=offText;btns[idx].style.borderColor=col;btns[idx].style.color=col;}, 2000);
 }
 
-// ── API Key Tester ────────────────────────────────────────────────────────
-async function testApiKey(){
-  const key = document.getElementById('aKey').value.trim();
-  const btn = document.getElementById('testKeyBtn');
-  const status = document.getElementById('keyStatus');
-  if(!key){ status.style.display='block'; status.style.color='#d29922'; status.textContent='Paste your Anthropic key first.'; return; }
-  btn.textContent='...'; btn.disabled=true;
-  status.style.display='block'; status.style.color='#7d8590'; status.textContent='Testing...';
-  try {
-    const r = await fetch('/api/test-key', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({key})});
-    const d = await r.json();
-    if(d.valid){
-      status.style.color='#2ea043';
-      status.textContent='✅ Key valid — ready to scan!';
-    } else {
-      status.style.color='#f85149';
-      status.textContent='❌ ' + (d.error||'Invalid key');
-    }
-  } catch(e) {
-    status.style.color='#f85149'; status.textContent='❌ Could not reach server';
-  }
-  btn.textContent='Test'; btn.disabled=false;
-}
-
 // ── Judge Demo Mode ────────────────────────────────────────────────────────
 function startJudgeDemo(){
   // Auto-fill NexaCorp AI Agent (most impressive demo)
@@ -1206,7 +1165,6 @@ function startJudgeDemo(){
   document.getElementById('tType').value = 'webhook';
   onTypeChange();
   document.getElementById('tUrl').value = window.location.origin + '/api/demo/agent/chat';
-  document.getElementById('tKey').value = '';
   document.getElementById('tModel').value = '';
   fetch(window.location.origin + '/api/demo/agent/reset', {method:'POST'}).catch(()=>{});
   // Show narration overlay

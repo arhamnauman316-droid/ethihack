@@ -268,8 +268,41 @@ def extract_json(text):
     except Exception:
         return None
 
+class _FakeMsg:
+    """Wraps any text into an Anthropic-shaped response so callers don't change."""
+    def __init__(self, text):
+        self.content = [type('_C', (), {'text': text})()]
+
+async def _gemini_generate(messages, max_tokens=500):
+    """Call Gemini 1.5 Flash via REST — returns _FakeMsg."""
+    key = os.environ.get("GEMINI_API_KEY", "")
+    if not key:
+        return _FakeMsg("")
+    # Flatten messages list to a single prompt string
+    prompt = "\n".join(m.get("content","") for m in messages if isinstance(m, dict))
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.7}
+    }
+    for attempt in range(3):
+        try:
+            async with httpx.AsyncClient(timeout=30) as c:
+                r = await c.post(url, json=payload)
+                data = r.json()
+                text = (data.get("candidates") or [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                return _FakeMsg(text)
+        except Exception:
+            if attempt == 2:
+                return _FakeMsg("")
+            await asyncio.sleep(1)
+    return _FakeMsg("")
+
 async def run_in_executor(client, **kwargs):
     loop = asyncio.get_event_loop()
+    # If no Anthropic client available, fall back to Gemini
+    if client is None:
+        return await _gemini_generate(kwargs.get("messages", []), kwargs.get("max_tokens", 500))
     for attempt in range(5):
         try:
             return await loop.run_in_executor(None, lambda: client.messages.create(**kwargs))
@@ -277,10 +310,11 @@ async def run_in_executor(client, **kwargs):
             err = str(e)
             retryable = any(x in err for x in ["rate_limit","529","429","500","overloaded","internal_server"])
             if retryable:
-                wait = 1 * (attempt + 1)   # 1s, 2s, 3s, 4s, 5s
+                wait = 1 * (attempt + 1)
                 await asyncio.sleep(wait)
                 if attempt == 4:
-                    raise
+                    # Final fallback: try Gemini
+                    return await _gemini_generate(kwargs.get("messages", []), kwargs.get("max_tokens", 500))
             else:
                 raise
 
@@ -991,7 +1025,8 @@ async def run_demo_instant(scan_id: str, req: ScanRequest, demo_key: str):
 async def run_scan(scan_id: str, req: ScanRequest):
     queue = scans[scan_id]["queue"]
     _anthropic_key = req.anthropic_key or os.environ.get("ANTHROPIC_API_KEY", "")
-    client = anthropic.Anthropic(api_key=_anthropic_key)
+    # Use Claude if key available, otherwise fall back to Gemini (set GEMINI_API_KEY in .env)
+    client = anthropic.Anthropic(api_key=_anthropic_key) if _anthropic_key else None
 
     # ── Instant demo mode — skip all API calls, stream pre-baked results ──
     demo_key = is_demo_target(req.target_url)
@@ -2051,55 +2086,4 @@ async def test_key(body: dict):
         ))
         return {"valid": True, "model": resp.model}
     except Exception as e:
-        err = str(e)
-        if "401" in err or "auth" in err.lower():
-            return {"valid": False, "error": "Invalid key — authentication failed"}
-        if "429" in err or "rate" in err.lower():
-            return {"valid": True, "error": "Key valid but rate limited — try again shortly"}
-        return {"valid": False, "error": err[:120]}
-
-@app.get("/api/scan/{scan_id}")
-async def get_scan(scan_id: str):
-    history = load_history()
-    for s in history:
-        if s.get("scan_id") == scan_id:
-            return s
-    raise HTTPException(status_code=404, detail="Scan not found")
-
-@app.get("/api/report/{scan_id}")
-async def get_report(scan_id: str):
-    history = load_history()
-    scan_data = None
-    for s in history:
-        if s.get("scan_id") == scan_id:
-            scan_data = s
-            break
-    if not scan_data:
-        raise HTTPException(status_code=404, detail="Scan not found")
-    try:
-        pdf_bytes = generate_pdf_report(scan_id, scan_data)
-        return Response(
-            content=pdf_bytes,
-            media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=ethihack-report-{scan_id[:8]}.pdf"}
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
-
-@app.get("/api/history")
-async def get_history():
-    scans = load_history()
-    return {"scans": scans}
-
-@app.delete("/api/history")
-async def delete_history():
-    try:
-        with open(HISTORY_FILE, "w") as f:
-            json.dump([], f)
-    except Exception:
-        pass
-    return {"ok": True}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        return {"valid": False, "error": str(e)[:200]}

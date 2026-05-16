@@ -3,10 +3,11 @@ echo.
 echo  EthiHack v5.0 - Competition Edition
 echo.
 
-REM Load API key from .env file if it exists
+REM Load API keys from .env file if it exists
 if exist .env (
   for /f "tokens=1,2 delims==" %%a in (.env) do (
     if "%%a"=="ANTHROPIC_API_KEY" set ANTHROPIC_API_KEY=%%b
+    if "%%a"=="GEMINI_API_KEY" set GEMINI_API_KEY=%%b
   )
 )
 
