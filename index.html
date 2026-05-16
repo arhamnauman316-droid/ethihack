@@ -477,9 +477,9 @@ select option{background:#111820}
     </div>
 
     <!-- What is this banner -->
-    <div style="background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.15);border-radius:8px;padding:10px 12px">
-      <div style="font-size:11px;font-weight:700;color:#58a6ff;margin-bottom:4px">💡 What does EthiHack do?</div>
-      <div style="font-size:10px;color:#8b949e;line-height:1.6">It tries to trick your AI into doing things it shouldn't — like revealing secrets, ignoring its rules, or leaking data. Then it tells you exactly what's broken and how to fix it.</div>
+    <div style="background:linear-gradient(135deg,rgba(248,81,73,0.08),rgba(88,166,255,0.08));border:1px solid rgba(88,166,255,0.2);border-radius:10px;padding:12px 14px">
+      <div style="font-size:12px;font-weight:700;color:#e6edf3;margin-bottom:5px">🔐 What does EthiHack do?</div>
+      <div style="font-size:11px;color:#8b949e;line-height:1.7">Tries to hack your AI the same way real attackers would — then shows you exactly what broke and how to fix it. Takes about 2 minutes.</div>
     </div>
 
     <!-- Bug Bounty fields -->
@@ -508,7 +508,7 @@ select option{background:#111820}
     <div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div style="width:20px;height:20px;border-radius:50%;background:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0d1117;flex-shrink:0">1</div>
-        <div style="font-size:11px;font-weight:700;color:#e6edf3">Name the AI you want to test</div>
+        <div style="font-size:11px;font-weight:700;color:#e6edf3">What AI are you testing?</div>
       </div>
       <div class="form-group">
         <input id="tName" placeholder="e.g. My Company Chatbot">
@@ -522,7 +522,7 @@ select option{background:#111820}
     <div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div style="width:20px;height:20px;border-radius:50%;background:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0d1117;flex-shrink:0">2</div>
-        <div style="font-size:11px;font-weight:700;color:#e6edf3">Which AI platform is it built on?</div>
+        <div style="font-size:11px;font-weight:700;color:#e6edf3">Which AI service does it use?</div>
       </div>
       <div class="form-group">
         <select id="tType" onchange="onTypeChange()">
@@ -559,56 +559,66 @@ select option{background:#111820}
       <span style="font-size:10px;color:#58a6ff;font-weight:600">EthiHack AI Engine — Ready</span>
     </div>
 
-    <!-- Try an example divider -->
+    <!-- Quick examples - prominently at top -->
+    <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px">
+      <div style="font-size:11px;font-weight:700;color:#e6edf3;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span style="background:#f85149;color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700">QUICKSTART</span>
+        Pick an AI to test — scanning starts instantly
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn-demo" onclick="loadDemo()" style="border-color:rgba(88,166,255,0.3);padding:10px 12px;display:flex;align-items:center;gap:10px;border-radius:8px">
+          <span style="font-size:18px">💬</span>
+          <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:#e6edf3">Customer Support Bot</div>
+            <div style="font-size:10px;color:#7d8590;margin-top:1px">Chatbot that handles customer questions</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;color:#484f58">▶ Start</span>
+        </button>
+        <button class="btn-demo" onclick="loadAgentDemo()" style="border-color:rgba(248,81,73,0.35);padding:10px 12px;display:flex;align-items:center;gap:10px;border-radius:8px">
+          <span style="font-size:18px">🤖</span>
+          <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:#f85149">AI Agent with Real Tools</div>
+            <div style="font-size:10px;color:#7d8590;margin-top:1px">Can send emails, search web, run code</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;color:#484f58">▶ Start</span>
+        </button>
+        <button class="btn-demo" onclick="loadRagDemo()" style="border-color:rgba(210,153,34,0.35);padding:10px 12px;display:flex;align-items:center;gap:10px;border-radius:8px">
+          <span style="font-size:18px">📚</span>
+          <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:#d29922">Document-Aware AI</div>
+            <div style="font-size:10px;color:#7d8590;margin-top:1px">Reads files &amp; databases to answer</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;color:#484f58">▶ Start</span>
+        </button>
+        <button class="btn-demo" onclick="loadHardenedDemo()" style="border-color:rgba(46,160,67,0.35);padding:10px 12px;display:flex;align-items:center;gap:10px;border-radius:8px">
+          <span style="font-size:18px">🛡️</span>
+          <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:#2ea043">Hardened / Secure AI</div>
+            <div style="font-size:10px;color:#7d8590;margin-top:1px">See what a properly protected AI looks like</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;color:#484f58">▶ Start</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Divider -->
     <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
       <div style="flex:1;height:1px;background:#1e2a38"></div>
-      <span style="font-size:10px;color:#484f58;font-weight:600">OR TRY AN EXAMPLE</span>
+      <span style="font-size:10px;color:#484f58;font-weight:600">OR TEST YOUR OWN AI</span>
       <div style="flex:1;height:1px;background:#1e2a38"></div>
     </div>
 
-    <!-- Quick examples with plain English descriptions -->
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <button class="btn-demo" onclick="loadDemo()">
-        <span style="font-size:13px">💬</span>
-        <div style="text-align:left">
-          <div style="font-size:11px;font-weight:600;color:#e6edf3">Customer Support Bot</div>
-          <div style="font-size:9px;color:#484f58">A chatbot that answers questions</div>
-        </div>
-      </button>
-      <button class="btn-demo" onclick="loadAgentDemo()" style="border-color:rgba(248,81,73,0.25)">
-        <span style="font-size:13px">🤖</span>
-        <div style="text-align:left">
-          <div style="font-size:11px;font-weight:600;color:#f85149">AI with Real Tools</div>
-          <div style="font-size:9px;color:#484f58">Can send emails, search web, run code</div>
-        </div>
-      </button>
-      <button class="btn-demo" onclick="loadRagDemo()" style="border-color:rgba(210,153,34,0.25)">
-        <span style="font-size:13px">📚</span>
-        <div style="text-align:left">
-          <div style="font-size:11px;font-weight:600;color:#d29922">Document-Aware AI</div>
-          <div style="font-size:9px;color:#484f58">Reads your files/database to answer</div>
-        </div>
-      </button>
-      <button class="btn-demo" onclick="loadHardenedDemo()" style="border-color:rgba(46,160,67,0.25)">
-        <span style="font-size:13px">🛡️</span>
-        <div style="text-align:left">
-          <div style="font-size:11px;font-weight:600;color:#2ea043">Well-Protected AI</div>
-          <div style="font-size:9px;color:#484f58">See what a secure AI looks like</div>
-        </div>
-      </button>
-    </div>
-
-    <button class="btn-scan" id="scanBtn" onclick="startScan()">
+    <button class="btn-scan" id="scanBtn" onclick="startScan()" style="padding:13px;font-size:14px;border-radius:9px;letter-spacing:0.02em">
       <div class="spinner"></div>
-      <span class="btn-text">⚡ Run Security Test</span>
+      <span class="btn-text">⚡ Start Security Scan</span>
     </button>
 
     <!-- Fingerprint result -->
     <div class="fp-card" id="fpCard">
-      <div style="font-size:10px;font-weight:700;color:#58a6ff;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">What we found about this AI</div>
-      <div class="fp-row"><span class="fp-label">AI Model</span><span class="fp-val fp-chip chip-blue" id="fpModel">—</span></div>
-      <div class="fp-row"><span class="fp-label">Has Safety Rules</span><span id="fpGuard" class="fp-chip">—</span></div>
-      <div class="fp-row"><span class="fp-label">Reveals Itself</span><span id="fpIdent" class="fp-chip">—</span></div>
+      <div style="font-size:10px;font-weight:700;color:#58a6ff;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">🔍 Target AI Identified</div>
+      <div class="fp-row"><span class="fp-label">AI Type</span><span class="fp-val fp-chip chip-blue" id="fpModel">—</span></div>
+      <div class="fp-row"><span class="fp-label">Has Guardrails?</span><span id="fpGuard" class="fp-chip">—</span></div>
+      <div class="fp-row"><span class="fp-label">Reveals Its Identity?</span><span id="fpIdent" class="fp-chip">—</span></div>
     </div>
   </aside>
 
@@ -625,27 +635,37 @@ select option{background:#111820}
       </div>
     </div>
     <div class="feed" id="feed">
-      <div class="empty">
-  <div class="ico">🛡️</div>
-  <p style="font-size:15px;color:#e6edf3;font-weight:700;margin-bottom:6px">Test your AI for security holes</p>
-  <p style="font-size:12px;color:#7d8590;max-width:280px;margin:0 auto 16px;line-height:1.6">EthiHack will try 20 different hacking techniques on your AI and show you exactly which ones worked — in plain English.</p>
-  <div style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;max-width:300px;margin:0 auto;text-align:left">
-    <div style="font-size:11px;font-weight:700;color:#e6edf3;margin-bottom:10px">To get started:</div>
-    <div class="empty-steps">
-      <div class="empty-step"><div class="empty-step-num">1</div><span>Fill in your AI details on the left</span></div>
-      <div class="empty-step"><div class="empty-step-num">2</div><span>Click <strong style="color:#f85149">⚡ Run Security Test</strong></span></div>
-      <div class="empty-step"><div class="empty-step-num">3</div><span>Get a full report with fixes in ~2 min</span></div>
-    </div>
-    <div style="margin-top:12px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#58a6ff;font-weight:600;cursor:pointer" onclick="loadDemo()">→ Or just click here to try a demo first</div>
-  </div>
-</div>
+      <div class="empty" style="padding:60px 30px">
+        <div style="font-size:52px;margin-bottom:16px">🔐</div>
+        <p style="font-size:18px;color:#e6edf3;font-weight:700;margin-bottom:8px">Ready to find security holes</p>
+        <p style="font-size:13px;color:#7d8590;max-width:320px;margin:0 auto 28px;line-height:1.7">Pick any example on the left and the scan starts automatically — no setup needed. Results appear here in real time.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:340px;margin:0 auto">
+          <div onclick="loadDemo()" style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color 0.2s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">
+            <span style="font-size:24px">💬</span>
+            <div style="text-align:left">
+              <div style="font-size:13px;font-weight:700;color:#e6edf3">Try: Customer Support Bot</div>
+              <div style="font-size:11px;color:#484f58;margin-top:2px">Most common AI type · See instant results</div>
+            </div>
+            <span style="margin-left:auto;font-size:18px;color:#58a6ff">→</span>
+          </div>
+          <div onclick="loadAgentDemo()" style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color 0.2s" onmouseover="this.style.borderColor='#f85149'" onmouseout="this.style.borderColor='#30363d'">
+            <span style="font-size:24px">🤖</span>
+            <div style="text-align:left">
+              <div style="font-size:13px;font-weight:700;color:#f85149">Try: AI Agent with Real Tools</div>
+              <div style="font-size:11px;color:#484f58;margin-top:2px">Most dangerous type · Most impressive demo</div>
+            </div>
+            <span style="margin-left:auto;font-size:18px;color:#f85149">→</span>
+          </div>
+        </div>
+        <p style="margin-top:24px;font-size:11px;color:#30363d">or fill in your own AI details on the left ↑</p>
+      </div>
     </div>
   </main>
 
   <!-- Right: Graph + Timeline + Remediations -->
   <div class="right-panel">
     <div class="rp-section">
-      <div class="rp-title">Test Coverage Map</div>
+      <div class="rp-title">🗺️ Attack Coverage Map</div>
       <canvas id="graph-canvas"></canvas>
     </div>
     <!-- Tool Call Timeline (shown for agent scans) -->
@@ -654,10 +674,10 @@ select option{background:#111820}
       <div id="timelineList" style="display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto"></div>
     </div>
     <div class="rp-section" style="border-bottom:none;padding-bottom:6px">
-      <div class="rp-title">How to Fix These Issues</div>
+      <div class="rp-title">🔧 How to Fix These Issues</div>
     </div>
     <div class="rem-list" id="remList">
-      <div class="rem-empty" style="font-size:11px;line-height:1.6;color:#484f58">How-to-fix suggestions will appear here after the test finishes.</div>
+      <div class="rem-empty" style="font-size:11px;line-height:1.6;color:#484f58">Fix suggestions will appear here once the scan is done.</div>
     </div>
   </div>
 
