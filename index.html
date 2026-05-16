@@ -871,16 +871,31 @@ function addPhase(msg){
   append(el);
 }
 function addIntel(msg){
+  // Suppress raw technical logs — they clutter the feed
+  // Only show short human-readable intel lines
+  if(msg.length > 120) return;
+  const skip = ['Exception','Traceback','File "','line ','Error:','WARNING','DEBUG','INFO ','urllib','httpx','asyncio'];
+  if(skip.some(s=>msg.includes(s))) return;
   const el=mk('div','intel-row'); el.textContent=msg; append(el);
 }
 function addAttackCard(idx,total,name,cat,short,owaspId,mitreId){
   const el=mk('div','attack-card'); el.id=`atk-${idx}`;
+  // Translate technical category names to plain English
+  const catMap = {
+    'Prompt Injection':'Tricking the AI','Insecure Output Handling':'Dangerous Responses',
+    'Training Data Extraction':'Data Leaks','Model Denial of Service':'Overloading the AI',
+    'Supply Chain Vulnerabilities':'Third-party Risks','Sensitive Information Disclosure':'Privacy Leaks',
+    'Insecure Plugin Design':'Plugin Abuse','Excessive Agency':'AI Overstepping Limits',
+    'Overreliance':'Blind Trust Exploit','Model Theft':'AI Cloning',
+    'Jailbreak via Roleplay':'Roleplay Bypass','Context Manipulation':'Memory Poisoning',
+    'Encoded Prompt Injection':'Hidden Commands','Gradual Scope Escalation':'Slow Takeover',
+    'System Identity Disclosure':'Identity Leak'
+  };
+  const friendlyCat = catMap[cat] || cat;
   el.innerHTML=`<div class="atk-header" onclick="toggle(${idx})">
-    <div class="atk-badge badge-test">TESTING</div>
+    <div class="atk-badge badge-test">🔄 Testing...</div>
     <div class="atk-name">${esc(name)}</div>
-    ${owaspId?`<div class="owasp-tag">${esc(owaspId)}</div>`:''}
-    ${mitreId?`<div class="mitre-tag">${esc(mitreId)}</div>`:''}
-    <div class="atk-cat">${esc(cat)}</div>
+    <div class="atk-cat">${esc(friendlyCat)}</div>
     <div class="sev-dot" style="background:#d29922"></div>
   </div><div class="atk-body" id="body-${idx}"></div>`;
   append(el);
@@ -888,7 +903,7 @@ function addAttackCard(idx,total,name,cat,short,owaspId,mitreId){
 function updateAttackCard(idx,vuln,sev,explanation,brokeAt,previews,confidence,owaspId,verdict,mitreId,businessImpact,adaptive,toolConfirmed,toolActions,attackTurns,cvss){
   const el=document.getElementById(`atk-${idx}`); if(!el)return;
   const badgeClass=vuln?'badge-vuln':'badge-secure';
-  const badgeText=vuln?'⚠ ISSUE FOUND':'✅ SAFE';
+  const badgeText=vuln?'⚠️ Vulnerability Found':'✅ Passed';
   const sevCol=sev>=7?'#f85149':sev>=4?'#d29922':'#2ea043';
   const conf=confidence||0;
   const confCol=conf>=80?'#2ea043':conf>=60?'#d29922':'#7d8590';
@@ -1008,7 +1023,7 @@ function showComplete(score,total,vulns,rems,highConf,owaspCovered,toolConfirmed
   el.style.cssText=`background:${bg};border-color:${col}40`;
   el.innerHTML=`
     <div style="display:flex;justify-content:center;margin-bottom:8px">${modeTag}</div>
-    <div class="score-sublabel">Scan Complete — OWASP LLM Top 10 + MITRE ATLAS</div>
+    <div class="score-sublabel">Security Scan Complete</div>
     <div class="score-big" style="color:${col}">${score}/100</div>
     <div style="font-size:14px;font-weight:700;color:${col};margin-bottom:4px">${label}</div>
     <div style="font-size:11px;color:#8b949e;margin-bottom:14px">${desc}</div>
@@ -1064,7 +1079,17 @@ function addRemediation(rem){
   list.appendChild(el);
 }
 
-function addErr(msg){const el=mk('div','error-card');el.textContent='⚠ '+msg;append(el);}
+function addErr(msg){
+  // Don't show raw errors in the feed — show a friendly message instead
+  const friendly = 'Something went wrong during the scan. Please try again.';
+  const existing = document.getElementById('err-banner');
+  if(existing){ existing.textContent = '⚠️ ' + friendly; return; }
+  const el=mk('div','phase-card'); el.id='err-banner';
+  el.style.borderColor='rgba(248,81,73,0.4)';
+  el.innerHTML=`<span style="color:#f85149;font-size:13px">⚠️</span><span style="color:#f85149;font-size:12px">${friendly}</span>`;
+  append(el);
+  console.warn('EthiHack error:', msg); // keep raw error in dev tools only
+}
 function showScore(score){
   const col=score>=70?'#2ea043':score>=40?'#d29922':'#f85149';
   document.getElementById('scoreNum').textContent=`${score}/100`;
