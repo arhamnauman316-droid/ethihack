@@ -5,25 +5,41 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='repla
 
 import asyncio
 import json
+import logging
 import os
 import re
+import time
 import uuid
 from datetime import datetime
 
 import anthropic
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fpdf import FPDF
 from pydantic import BaseModel
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("ethihack")
 
 app = FastAPI(title="EthiHack")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 scans = {}
 
+# ── Global exception handler — catches any unhandled 500 ─────────────────────
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    log.error(f"Unhandled error on {request.url}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "detail": str(exc)[:300]}
+    )
+
 # ── Scan History ──────────────────────────────────────────────────────────────
-HISTORY_FILE = os.path.join(os.path.dirname(__file__), "scan_history.json")
+# Use __file__ if available, otherwise fall back to cwd (Railway-safe)
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__)) if "__file__" in dir() else os.getcwd()
+HISTORY_FILE = os.path.join(_BASE_DIR, "scan_history.json")
 
 def load_history() -> list:
     try:
@@ -305,22 +321,33 @@ async def run_in_executor(client, **kwargs):
         return await _gemini_generate(kwargs.get("messages", []), kwargs.get("max_tokens", 500))
     for attempt in range(5):
         try:
-            return await loop.run_in_executor(None, lambda: client.messages.create(**kwargs))
+            # Capture kwargs in closure to avoid late-binding bug
+            captured = dict(kwargs)
+            result = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: client.messages.create(**captured)),
+                timeout=60.0  # 60s hard timeout per LLM call
+            )
+            return result
+        except asyncio.TimeoutError:
+            log.warning(f"Anthropic call timed out (attempt {attempt+1})")
+            if attempt == 4:
+                return await _gemini_generate(kwargs.get("messages", []), kwargs.get("max_tokens", 500))
+            await asyncio.sleep(2)
         except Exception as e:
             err = str(e)
             retryable = any(x in err for x in ["rate_limit","529","429","500","overloaded","internal_server"])
             if retryable:
-                wait = 1 * (attempt + 1)
+                wait = 2 * (attempt + 1)
+                log.warning(f"Anthropic retryable error (attempt {attempt+1}): {err[:100]}")
                 await asyncio.sleep(wait)
                 if attempt == 4:
-                    # Final fallback: try Gemini
                     return await _gemini_generate(kwargs.get("messages", []), kwargs.get("max_tokens", 500))
             else:
                 raise
 
 async def send_msg(url, message, api_key, target_type, history=None, target_model=""):
     try:
-        async with httpx.AsyncClient(timeout=3.5) as c:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=10.0)) as c:
 
             # ── OpenAI-compatible APIs (OpenAI, Groq, Together, Ollama, LM Studio) ──
             if target_type in ("openai", "groq", "together", "ollama", "lmstudio"):
