@@ -907,7 +907,7 @@ function updateAttackCard(idx,vuln,sev,explanation,brokeAt,previews,confidence,o
   const sevCol=sev>=7?'#f85149':sev>=4?'#d29922':'#2ea043';
   const conf=confidence||0;
   const confCol=conf>=80?'#2ea043':conf>=60?'#d29922':'#7d8590';
-  const verdictLabel={'BOTH_AGREE_VULNERABLE':'✓ Confirmed by 2 AIs','BOTH_AGREE_SECURE':'✓ Confirmed safe','SONNET_ONLY':'Sonnet only','HAIKU_ONLY_DISMISSED':'Dismissed','TOOL_EXECUTION_CONFIRMED':'⚡ Real action happened!'}[verdict]||'';
+  const verdictLabel={'BOTH_AGREE_VULNERABLE':'🔴 Confirmed by 2 AIs','BOTH_AGREE_SECURE':'🟢 Double-checked: Safe','SONNET_ONLY':'🟡 Caught by deep scan','HAIKU_ONLY_DISMISSED':'✓ Reviewed: False alarm','TOOL_EXECUTION_CONFIRMED':'💥 Actually happened!','CONFIRMED':'✓ Confirmed'}[verdict]||'';
   el.querySelector('.atk-badge').className=`atk-badge ${badgeClass}`;
   el.querySelector('.atk-badge').textContent=badgeText;
   el.querySelector('.sev-dot').style.background=sevCol;
