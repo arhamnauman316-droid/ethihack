@@ -1,20 +1,6 @@
-# Secret keys - NEVER upload these
-.env
-*.env
-
-# Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-venv/
-env/
-
-# Scan data
-scan_results/
-*.db
-
-# OS
-.DS_Store
-Thumbs.db
+*.pdf
+*.log
+.env
+scan_history.json
