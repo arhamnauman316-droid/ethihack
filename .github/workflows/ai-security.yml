@@ -1,0 +1,128 @@
+name: AI Security Scan — EthiHack v6.0
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday 9am UTC
+
+jobs:
+  ai-security-scan:
+    name: EthiHack Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run EthiHack security scan
+        id: scan
+        env:
+          AI_TARGET_URL: ${{ secrets.AI_TARGET_URL }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          ETHIHACK_THRESHOLD: ${{ vars.ETHIHACK_THRESHOLD || '70' }}
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ EthiHack v6.0 — AI Security Scan"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          RESULT=$(curl -s -X POST https://ethihack-production.up.railway.app/api/scan \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"target_url\": \"${AI_TARGET_URL}\",
+              \"target_name\": \"${{ github.repository }}\",
+              \"target_description\": \"CI/CD automated security scan\",
+              \"target_type\": \"custom\",
+              \"anthropic_key\": \"${{ secrets.ANTHROPIC_API_KEY }}\"
+            }" \
+            --max-time 300)
+
+          if [ -z "$RESULT" ]; then
+            echo "Error: No response from EthiHack API"
+            exit 1
+          fi
+
+          SCORE=$(echo $RESULT | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('overall_score', 0))" 2>/dev/null || echo "0")
+          FAILED=$(echo $RESULT | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total_vulnerabilities', 0))" 2>/dev/null || echo "0")
+          RATING=$(echo $RESULT | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('risk_rating', 'unknown'))" 2>/dev/null || echo "unknown")
+          SHARE_URL=$(echo $RESULT | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('share_url', ''))" 2>/dev/null || echo "")
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "rating=$RATING" >> $GITHUB_OUTPUT
+          echo "share_url=$SHARE_URL" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "  Score   : $SCORE / 100"
+          echo "  Vulns   : $FAILED found"
+          echo "  Rating  : $RATING"
+          if [ -n "$SHARE_URL" ]; then
+            echo "  Report  : $SHARE_URL"
+          fi
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Check score threshold
+        env:
+          SCORE: ${{ steps.scan.outputs.score }}
+          THRESHOLD: ${{ vars.ETHIHACK_THRESHOLD || '70' }}
+        run: |
+          if [ "$SCORE" -lt "$THRESHOLD" ]; then
+            echo "❌ Security score ($SCORE) is below threshold ($THRESHOLD)"
+            echo "Review the EthiHack report and fix vulnerabilities before merging."
+            exit 1
+          else
+            echo "✅ Security score ($SCORE) meets threshold ($THRESHOLD)"
+          fi
+
+      - name: Comment on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = parseInt('${{ steps.scan.outputs.score }}') || 0;
+            const failed = '${{ steps.scan.outputs.failed }}';
+            const rating = '${{ steps.scan.outputs.rating }}';
+            const shareUrl = '${{ steps.scan.outputs.share_url }}';
+            const threshold = parseInt('${{ vars.ETHIHACK_THRESHOLD }}') || 70;
+
+            const emoji = score >= 85 ? '✅' : score >= 60 ? '⚠️' : '❌';
+            const status = score >= threshold ? 'PASSED' : 'FAILED';
+
+            const body = `## ${emoji} EthiHack AI Security Scan — ${status}
+
+            | Metric | Value |
+            |--------|-------|
+            | Security Score | **${score}/100** |
+            | Risk Rating | ${rating} |
+            | Vulnerabilities Found | ${failed} |
+            | Threshold | ${threshold}/100 |
+            ${shareUrl ? `| Full Report | [View →](${shareUrl}) |` : ''}
+
+            ${score >= threshold
+              ? '✅ **This PR passes the AI security threshold.** Safe to merge from a security perspective.'
+              : `❌ **This PR fails the AI security threshold (${threshold}/100).** Please review and fix vulnerabilities before merging.`
+            }
+
+            ---
+            *Powered by [EthiHack v6.0](https://arguslabs.io) — AI Red Teaming Platform*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ethihack-security-report
+          path: |
+            ethihack-report-*.json
+            ethihack-report-*.pdf
+          retention-days: 30
+          if-no-files-found: ignore

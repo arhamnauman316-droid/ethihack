@@ -4,3 +4,7 @@ __pycache__/
 *.log
 .env
 scan_history.json
+*.pdf 
+__pycache__/ 
+*.pyc 
+.env 
