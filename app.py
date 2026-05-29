@@ -4,6 +4,8 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 import asyncio
+from collections import defaultdict
+import hashlib
 import json
 import logging
 import os
@@ -24,6 +26,66 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("ethihack")
 
 app = FastAPI(title="EthiHack")
+
+
+# ═══════════════════════════════════════════════
+# EthiHack v6.0 — Added helpers
+# ═══════════════════════════════════════════════
+
+_rate_store = defaultdict(list)
+
+def check_rate_limit(ip: str, max_calls: int = 3) -> tuple:
+    """Rate limit: max 3 scans per minute per IP."""
+    now = time.time()
+    _rate_store[ip] = [t for t in _rate_store[ip] if now - t < 60]
+    if len(_rate_store[ip]) >= max_calls:
+        oldest = min(_rate_store[ip])
+        retry_after = int(60 - (now - oldest)) + 1
+        return False, retry_after
+    _rate_store[ip].append(now)
+    return True, 0
+
+
+def cvss_for_severity(severity_score: int) -> dict:
+    """Convert 0-10 severity to CVSS 3.1 entry."""
+    if severity_score >= 9:
+        return {"score": min(10.0, round(8.5 + (severity_score-9)*0.75, 1)),
+                "rating": "CRITICAL",
+                "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"}
+    elif severity_score >= 7:
+        return {"score": round(7.0 + (severity_score-7)*0.6, 1),
+                "rating": "HIGH",
+                "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N"}
+    elif severity_score >= 4:
+        return {"score": round(4.0 + (severity_score-4)*0.9, 1),
+                "rating": "MEDIUM",
+                "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N"}
+    elif severity_score >= 1:
+        return {"score": round(1.0 + (severity_score-1)*0.9, 1),
+                "rating": "LOW",
+                "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"}
+    return {"score": 0.0, "rating": "NONE",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"}
+
+
+def make_share_id(target_name: str) -> str:
+    """Generate 8-char unique share ID."""
+    import random
+    raw = f"{target_name}{time.time()}{random.random()}"
+    return hashlib.md5(raw.encode()).hexdigest()[:8].upper()
+
+
+def get_scan_by_share_id(share_id: str) -> dict:
+    """Look up a scan by its share ID."""
+    try:
+        history = load_scan_history()
+        for scan in history:
+            if scan.get("share_id", "").upper() == share_id.upper():
+                return scan
+    except Exception:
+        pass
+    return None
+
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 scans = {}
 
@@ -1662,3 +1724,67 @@ async def test_key(body: dict):
         return {"valid": True, "model": resp.model}
     except Exception as e:
         return {"valid": False, "error": str(e)[:200]}
+
+
+# ═══════════════════════════════════════════════
+# EthiHack v6.0 — New API routes
+# ═══════════════════════════════════════════════
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "version": "6.0", "tests": 73, "categories": 10}
+
+
+@app.get("/api/stats")
+async def api_stats():
+    try:
+        history = load_scan_history()
+        scored = [h for h in history if h.get("overall_score") is not None]
+        total_vulns = sum(h.get("total_vulnerabilities", 0) for h in history)
+        avg = round(sum(h.get("overall_score", 0) for h in scored) / max(len(scored), 1))
+        return {
+            "total_scans": len(history),
+            "total_vulnerabilities_found": total_vulns,
+            "avg_score": avg,
+            "tests_run": len(history) * 73,
+        }
+    except Exception:
+        return {"total_scans": 0, "total_vulnerabilities_found": 0,
+                "avg_score": 0, "tests_run": 0}
+
+
+@app.get("/api/leaderboard")
+async def api_leaderboard():
+    try:
+        history = load_scan_history()
+        scored = [h for h in history
+                  if h.get("overall_score") is not None and h.get("share_id")]
+        scored.sort(key=lambda x: x.get("overall_score", 0), reverse=True)
+        return {
+            "leaderboard": [
+                {
+                    "rank": i + 1,
+                    "target_name": h.get("target_name", "Unknown AI"),
+                    "score": h.get("overall_score", 0),
+                    "vulnerabilities": h.get("total_vulnerabilities", 0),
+                    "share_id": h.get("share_id", ""),
+                    "date": h.get("timestamp", "")[:10],
+                }
+                for i, h in enumerate(scored[:20])
+            ],
+            "total_scans": len(history)
+        }
+    except Exception:
+        return {"leaderboard": [], "total_scans": 0}
+
+
+@app.get("/api/results/{share_id}")
+async def api_get_result(share_id: str):
+    from fastapi import HTTPException
+    scan = get_scan_by_share_id(share_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+    public = {k: v for k, v in scan.items()
+              if k not in ["anthropic_key", "target_api_key"]}
+    return public
+
