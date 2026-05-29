@@ -78,7 +78,7 @@ def make_share_id(target_name: str) -> str:
 def get_scan_by_share_id(share_id: str) -> dict:
     """Look up a scan by its share ID."""
     try:
-        history = load_scan_history()
+        history = load_history()
         for scan in history:
             if scan.get("share_id", "").upper() == share_id.upper():
                 return scan
@@ -1738,7 +1738,7 @@ async def health_check():
 @app.get("/api/stats")
 async def api_stats():
     try:
-        history = load_scan_history()
+        history = load_history()
         scored = [h for h in history if h.get("overall_score") is not None]
         total_vulns = sum(h.get("total_vulnerabilities", 0) for h in history)
         avg = round(sum(h.get("overall_score", 0) for h in scored) / max(len(scored), 1))
@@ -1756,7 +1756,7 @@ async def api_stats():
 @app.get("/api/leaderboard")
 async def api_leaderboard():
     try:
-        history = load_scan_history()
+        history = load_history()
         scored = [h for h in history
                   if h.get("overall_score") is not None and h.get("share_id")]
         scored.sort(key=lambda x: x.get("overall_score", 0), reverse=True)
