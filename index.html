@@ -306,187 +306,64 @@ async function startScan(){
   if(isScanning)return;
   const url=document.getElementById('target-url').value.trim();
   const service=document.getElementById('ai-service').value;
-  const name='';
-  const tkey='';
-  const model='';
-  const company='';
-  const bblink='';
   if(!url)return;
   isScanning=true;currentResults=[];
   document.getElementById('scan-btn').disabled=true;
   document.getElementById('scan-icon').textContent='⏳';
   document.getElementById('scan-text').textContent='Scanning…';
   document.getElementById('empty-state').style.display='none';
+  document.getElementById('vuln-cards').innerHTML='';
   document.getElementById('vuln-cards').className='vuln-cards';
   document.getElementById('sum-bar').className='sum-bar';
   document.getElementById('share-btn').style.display='none';
   document.getElementById('report-btn').style.display='none';
   document.getElementById('bb-sec').style.display='none';
-  document.getElementById('score-display').textContent='—/100';
+  document.getElementById('score-display').textContent='0/100';
   document.getElementById('score-display').className='score';
-  document.getElementById('vuln-cards').innerHTML='';
   const log=document.getElementById('scan-log');
   log.innerHTML='';log.className='scan-log on';
   addLog('info','> Connecting to '+url);
   addLog('','> Loading 73 attack modules across 10 categories…');
   try{
-    const payload={target_url:url,anthropic_key:'',target_name:'Target AI',target_type:service||'custom',target_description:'AI system to security test'};
-    if(tkey)payload.target_api_key=tkey;
-    if(model)payload.model_version=model;
-    if(company)payload.company_name=company;
-    if(bblink)payload.bug_bounty_link=bblink;
+    const payload={
+      target_url:url,
+      anthropic_key:'',
+      target_name:'Target AI',
+      target_description:'AI system under security test',
+      target_type:service||'custom'
+    };
+    // Step 1: Start scan
     const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));addLog('fail','> Error: '+JSON.stringify(e));resetBtn();return}
-    const j=await res.json();const scan_id=j.scan_id;if(!scan_id){addLog('fail','> Error: no scan ID');resetBtn();return;}addLog('info','> Scan started: '+scan_id);const streamRes=await fetch('/api/stream/'+scan_id);const reader=streamRes.body&&streamRes.body.getReader();
-    if(reader){
-      const dec=new TextDecoder();let buf='';
-      while(true){
-        const{done,value}=await reader.read();
-        if(done)break;
-        buf+=dec.decode(value,{stream:true});
-        const lines=buf.split('\n');buf=lines.pop();
-        for(const line of lines){
-          const t=line.trim();
-          if(!t||t==='data: [DONE]')continue;
-          const raw=t.startsWith('data: ')?t.slice(6):t;
-          try{handleEvent(JSON.parse(raw))}catch{}
-        }
+    if(!res.ok){
+      const e=await res.json().catch(()=>({detail:'Server error'}));
+      addLog('fail','> Error: '+(e.detail||'Unknown error'));
+      resetBtn();return;
+    }
+    const j=await res.json();
+    const scan_id=j.scan_id;
+    if(!scan_id){addLog('fail','> Error: No scan ID returned');resetBtn();return;}
+    addLog('info','> Scan ID: '+scan_id+' — firing attack chains…');
+    // Step 2: Stream results
+    const streamRes=await fetch('/api/stream/'+scan_id);
+    if(!streamRes.ok){addLog('fail','> Stream error');resetBtn();return;}
+    const reader=streamRes.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
+    while(true){
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('
+');
+      buf=lines.pop();
+      for(const line of lines){
+        const t=line.trim();
+        if(!t||t==='data: [DONE]')continue;
+        const raw=t.startsWith('data: ')?t.slice(6):t;
+        try{handleEvent(JSON.parse(raw));}catch{}
       }
     }
-  }catch(e){addLog('fail','> Error: '+e.message)}
+  }catch(e){addLog('fail','> Error: '+e.message);}
   resetBtn();
 }
-function handleEvent(d){
-  if(d.type==='test_start')addLog('','> ['+d.test_id+'] '+d.test_name+'…');
-  else if(d.type==='test_result'){
-    const r=d.result;
-    if(r.vulnerable)addLog('fail','  ↳ VULNERABLE — '+(r.response||'').slice(0,80));
-    else addLog('ok','  ↳ SECURE ✓');
-    currentResults.push(r);renderCard(r);
-  }else if(d.type==='complete'||d.overall_score!==undefined)handleFinal(d);
-  else if(d.type==='log')addLog('',`> ${d.message}`);
-}
-function handleFinal(d){
-  const score=d.overall_score??0;
-  const vulns=d.vulnerabilities||d.results||currentResults;
-  addLog('info','> Done. Score: '+score+'/100 | '+(d.total_vulnerabilities||0)+' vulnerabilities ⚡');
-  const sel=document.getElementById('score-display');
-  sel.textContent=score+'/100';
-  sel.className='score '+(score>=80?'good':score>=60?'med':'bad');
-  setTimeout(()=>{
-    document.getElementById('scan-log').className='scan-log';
-    document.getElementById('vuln-cards').className='vuln-cards on';
-    document.getElementById('sum-bar').className='sum-bar on';
-  },500);
-  let crit=0,high=0,pass=0;
-  (vulns||[]).forEach(r=>{
-    if(!r.vulnerable){pass++;return}
-    const s=(r.severity||'').toLowerCase();
-    if(s==='critical')crit++;else if(s==='high')high++;
-  });
-  document.getElementById('sum-crit').textContent=crit;
-  document.getElementById('sum-high').textContent=high;
-  document.getElementById('sum-pass').textContent=pass;
-  renderCoverage(vulns||[]);
-  renderFixes(vulns||[]);
-  if(crit>0||high>0)document.getElementById('bb-sec').style.display='block';
-  if(d.share_id){
-    currentScanId=d.share_id;
-    document.getElementById('share-btn').style.display='flex';
-    document.getElementById('sum-id').textContent='ID: '+d.share_id;
-  }
-  const pdf=d.report_url||(d.share_id?'/report/'+d.share_id:null);
-  if(pdf){const b=document.getElementById('report-btn');b.href=pdf;b.style.display='flex'}
-  loadStats();
-}
-function renderCard(r){
-  const c=document.getElementById('vuln-cards');
-  const sev=(r.severity||'low').toLowerCase();
-  const sc=r.vulnerable?sev:'secure';
-  const el=document.createElement('div');
-  el.className='vcard '+sc+' fade-up';
-  el.innerHTML=`<div class="vhdr" onclick="toggleCard(this)">
-    <div class="vid">${r.test_id||r.id||'—'}</div>
-    <div class="vname">${r.test_name||r.name||'Security Test'}</div>
-    <div class="vsev ${sc}">${r.vulnerable?sev.toUpperCase():'SECURE'}</div>
-  </div>${r.vulnerable?`<div class="vbody">
-    <div class="vmeta">
-      <div class="vtag">OWASP <span>${r.owasp_id||'—'}</span></div>
-      <div class="vtag">CVSS <span>${r.cvss?.score||r.cvss_score||'—'}</span></div>
-      <div class="vtag">MITRE <span>${r.mitre_id||'—'}</span></div>
-    </div>
-    ${r.description?`<div class="vdesc">${esc(r.description)}</div>`:''}
-    ${r.payload?`<div class="vpayload">${esc(r.payload)}</div>`:''}
-    ${r.remediation?`<div class="vfix">💡 ${esc(r.remediation)}</div>`:''}
-  </div>`:''}`;
-  c.appendChild(el);
-}
-function toggleCard(h){const b=h.nextElementSibling;if(b)b.classList.toggle('open')}
-function renderCoverage(results){
-  const g=document.getElementById('cov-grid');
-  const cats={};
-  results.forEach(r=>{const id=r.owasp_id||'Other';if(!cats[id])cats[id]={t:0,v:0};cats[id].t++;if(r.vulnerable)cats[id].v++});
-  if(!Object.keys(cats).length)return;
-  const mx=Math.max(...Object.values(cats).map(c=>c.t),1);
-  g.innerHTML=Object.entries(cats).map(([id,c])=>`
-    <div class="cov-row">
-      <div class="cov-id">${id}</div>
-      <div class="cov-bg"><div class="cov-bar ${c.v>0?'v':''}" style="width:${(c.t/mx*100).toFixed(0)}%"></div></div>
-      <div class="cov-n">${c.t}</div>
-    </div>`).join('');
-}
-function renderFixes(results){
-  const vulns=results.filter(r=>r.vulnerable&&r.remediation);
-  if(!vulns.length)return;
-  document.getElementById('fix-content').innerHTML=vulns.slice(0,4).map(r=>`
-    <div class="vfix" style="margin-bottom:6px">
-      <strong style="font-size:10px;display:block;margin-bottom:3px;color:var(--text1)">${r.test_name||r.name}</strong>
-      ${esc(r.remediation)}
-    </div>`).join('');
-}
-function addLog(type,text){
-  const log=document.getElementById('scan-log');
-  const s=document.createElement('span');
-  s.className='ll '+type;s.textContent=text;
-  log.appendChild(s);log.scrollTop=log.scrollHeight;
-}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function resetBtn(){
-  isScanning=false;
-  document.getElementById('scan-btn').disabled=false;
-  document.getElementById('scan-icon').textContent='🛡';
-  document.getElementById('scan-text').textContent='Start Security Scan';
-  validateForm();
-}
-async function shareResults(){
-  if(!currentScanId)return;
-  await navigator.clipboard.writeText(location.origin+'/results/'+currentScanId).catch(()=>{});
-  const b=document.getElementById('share-btn');
-  const o=b.innerHTML;b.innerHTML='✓ Copied!';
-  setTimeout(()=>b.innerHTML=o,2000);
-}
-function copyReport(){
-  const text=currentResults.filter(r=>r.vulnerable).map(r=>`[${r.test_id}] ${r.test_name} — ${r.severity}\nOWASP: ${r.owasp_id} | CVSS: ${r.cvss?.score||'—'}\n${r.description||''}\n`).join('\n');
-  navigator.clipboard.writeText(text).catch(()=>{});
-}
-async function loadStats(){
-  try{
-    const r=await fetch('/api/stats');if(!r.ok)return;
-    const d=await r.json();
-    const n=d.total_scans||0;
-    document.getElementById('hdr-scans').innerHTML='<span>'+n+'</span> '+(n===1?'scan':'scans');
-    document.getElementById('hdr-vulns').innerHTML='<span>'+(d.total_vulnerabilities_found||0)+'</span> vulns found';
-  }catch{}
-}
-async function loadLeaderboard(){
-  try{
-    const r=await fetch('/api/leaderboard');if(!r.ok)return;
-    const d=await r.json();
-    const el=document.getElementById('lb-content');
-    if(!d.leaderboard?.length){el.innerHTML='<div class="rempty"><p>No scans yet</p></div>';return}
-    el.innerHTML=d.leaderboard.slice(0,8).map(s=>`<div class="lb-row"><div class="lb-rank">${s.rank}</div><div class="lb-name">${esc(s.target_name)}</div><div class="lb-score">${s.score}</div></div>`).join('');
-  }catch{}
-}
-</script>
-</body>
-</html>
+>
