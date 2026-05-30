@@ -330,7 +330,7 @@ async function startScan(){
   addLog('info','> Connecting to '+url);
   addLog('','> Loading 73 attack modules across 10 categories…');
   try{
-    const payload={target_url:url,anthropic_key:key,target_name:name||'Target AI',target_type:service||'custom'};
+    const payload={target_url:url,anthropic_key:'',target_name:name||'Target AI',target_type:service||'custom'};
     if(tkey)payload.target_api_key=tkey;
     if(model)payload.model_version=model;
     if(company)payload.company_name=company;
