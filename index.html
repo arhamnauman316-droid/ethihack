@@ -337,7 +337,7 @@ async function startScan(){
     if(bblink)payload.bug_bounty_link=bblink;
     const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));addLog('fail','> Error: '+JSON.stringify(e));resetBtn();return}
-    const reader=res.body&&res.body.getReader();
+    const j=await res.json();const scan_id=j.scan_id;if(!scan_id){addLog('fail','> Error: no scan ID');resetBtn();return;}addLog('info','> Scan started: '+scan_id);const streamRes=await fetch('/api/stream/'+scan_id);const reader=streamRes.body&&streamRes.body.getReader();
     if(reader){
       const dec=new TextDecoder();let buf='';
       while(true){
@@ -352,7 +352,7 @@ async function startScan(){
           try{handleEvent(JSON.parse(raw))}catch{}
         }
       }
-    }else{handleFinal(await res.json())}
+    }
   }catch(e){addLog('fail','> Error: '+e.message)}
   resetBtn();
 }
