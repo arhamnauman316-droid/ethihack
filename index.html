@@ -191,9 +191,6 @@ select option{background:var(--surface2)}
       </div>
       <div class="divider"></div>
       <div class="field">
-        <label class="field-label" for="anthropic-key">Anthropic API Key <span class="req">*</span></label>
-        <input type="password" id="anthropic-key" placeholder="sk-ant-..." oninput="validateForm()">
-        <div class="field-help">Generates adaptive attacks. <a href="https://console.anthropic.com" target="_blank">Get free key &rarr;</a></div>
       </div>
       <button class="adv-toggle" onclick="toggleAdv(this)">&#9654; &nbsp;&#9881; Advanced settings</button>
       <div class="adv-fields" id="adv-fields">
@@ -298,7 +295,6 @@ let isScanning=false,currentResults=[],currentScanId=null;
 document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLeaderboard();validateForm()});
 function validateForm(){
   const url=document.getElementById('target-url').value.trim();
-  const key=document.getElementById('anthropic-key').value.trim();
   document.getElementById('scan-btn').disabled=!url||isScanning;
 }
 function toggleAdv(btn){
@@ -309,7 +305,6 @@ function toggleAdv(btn){
 async function startScan(){
   if(isScanning)return;
   const url=document.getElementById('target-url').value.trim();
-  const key=document.getElementById('anthropic-key').value.trim();
   const service=document.getElementById('ai-service').value;
   const name=document.getElementById('ai-name').value.trim();
   const tkey=document.getElementById('target-key').value.trim();
