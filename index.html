@@ -1,5 +1,501 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head><meta charset="UTF-8"><title>EthiHack - AI Security Testing</title></head> 
-<body><h1>Loading EthiHack...</h1></body> 
-</html> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EthiHack — AI Security Testing</title>
+<meta name="description" content="Red-team your AI before attackers do. OWASP LLM Top 10. Free.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#080b0f;color:#e2e8f0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;overflow:hidden}
+:root{
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);--blue-border:rgba(59,130,246,0.3);
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.1);--red:#ef4444;--red-dim:rgba(239,68,68,0.1);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);
+  --surface:#0d1117;--surface2:#161b22;--surface3:#1c2128;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --text1:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --mono:'JetBrains Mono',monospace;
+}
+.app{display:grid;grid-template-rows:52px 1fr;height:100vh}
+.main{display:grid;grid-template-columns:320px 1fr 260px;overflow:hidden}
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:28px;height:28px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text1)}
+.logo-ver{font-family:var(--mono);font-size:9px;color:var(--blue);background:var(--blue-dim);border:1px solid var(--blue-border);padding:1px 6px;border-radius:3px}
+.hdr-badges{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:9px;color:var(--text3);border:1px solid var(--border);padding:3px 8px;border-radius:3px;letter-spacing:.05em;white-space:nowrap}
+.hdr-stats{display:flex;align-items:center;gap:12px}
+.stat{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.stat span{color:var(--text1);font-weight:600}
+/* PANELS */
+.left-panel{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.left-panel::-webkit-scrollbar{width:4px}
+.left-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.panel-hdr{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+.panel-title{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--text3);margin-bottom:2px}
+.panel-sub{font-size:12px;font-weight:500;color:var(--text1)}
+.form-body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;flex:1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:11px;font-weight:500;color:var(--text2)}
+.field-help{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.field-help a{color:var(--blue)}
+.req{color:var(--blue);margin-left:2px}
+input[type=text],input[type=url],input[type=password],select{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text1);font-family:'Inter',sans-serif;font-size:12px;padding:8px 10px;border-radius:6px;outline:none;transition:border-color .15s;appearance:none}
+input:focus,select:focus{border-color:var(--blue)}
+input::placeholder{color:var(--text3)}
+select{cursor:pointer}
+select option{background:var(--surface2)}
+.divider{height:1px;background:var(--border);margin:2px 0}
+.adv-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 0;border:none;background:none;width:100%;text-align:left;transition:color .15s}
+.adv-toggle:hover{color:var(--text1)}
+.adv-fields{display:none;flex-direction:column;gap:12px;padding-top:4px}
+.adv-fields.open{display:flex}
+.ethical{display:flex;gap:8px;padding:10px 12px;background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:11px;color:#fbbf24;line-height:1.5}
+.btn-scan{width:100%;background:var(--blue);color:#fff;border:none;padding:11px 16px;border-radius:7px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;letter-spacing:.02em;margin-top:4px}
+.btn-scan:hover{background:#2563eb}
+.btn-scan:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed}
+/* CENTER */
+.center-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--surface2)}
+.center-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.center-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3)}
+.score{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text1)}
+.score.good{color:var(--green)}.score.med{color:var(--amber)}.score.bad{color:var(--red)}
+.center-actions{display:flex;gap:6px}
+.btn-sm{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;text-decoration:none;letter-spacing:.04em}
+.btn-sm:hover{border-color:var(--blue-border);color:var(--blue)}
+.results-body{flex:1;overflow-y:auto;padding:16px 18px}
+.results-body::-webkit-scrollbar{width:4px}
+.results-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+/* EMPTY STATE */
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px 24px}
+.empty-icon{width:56px;height:56px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.empty-title{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:8px}
+.empty-sub{font-size:12px;color:var(--text2);text-align:center;max-width:280px;line-height:1.6;margin-bottom:28px}
+.steps{display:flex;flex-direction:column;gap:0;width:100%;max-width:320px}
+.step{display:flex;gap:12px;padding:12px 0;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;left:14px;top:36px;bottom:0;width:1px;background:var(--border)}
+.step-num{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);flex-shrink:0}
+.step-title{font-size:12px;font-weight:500;color:var(--text1);margin-bottom:2px;padding-top:4px}
+.step-desc{font-size:11px;color:var(--text2);line-height:1.5}
+/* SCAN LOG */
+.scan-log{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--text2);display:none}
+.scan-log.on{display:block}
+.ll{display:block}.ll.ok{color:var(--green)}.ll.fail{color:var(--red)}.ll.warn{color:var(--amber)}.ll.info{color:var(--blue)}
+/* VULN CARDS */
+.vuln-cards{display:none;flex-direction:column;gap:10px}
+.vuln-cards.on{display:flex}
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s}
+.vcard:hover{border-color:var(--border2)}
+.vcard.critical{border-left:3px solid var(--red)}.vcard.high{border-left:3px solid var(--amber)}
+.vcard.medium{border-left:3px solid var(--blue)}.vcard.secure{border-left:3px solid var(--green)}
+.vhdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
+.vid{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.08em;flex-shrink:0}
+.vname{font-size:12px;font-weight:500;color:var(--text1);flex:1}
+.vsev{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.06em;flex-shrink:0}
+.vsev.critical{background:var(--red-dim);color:var(--red)}.vsev.high{background:var(--amber-dim);color:var(--amber)}
+.vsev.medium{background:var(--blue-dim);color:var(--blue)}.vsev.secure{background:var(--green-dim);color:var(--green)}
+.vbody{padding:0 14px 12px;display:none;border-top:1px solid var(--border)}
+.vbody.open{display:block;padding-top:10px}
+.vmeta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.vtag{font-family:var(--mono);font-size:9px;color:var(--text3)}.vtag span{color:var(--text2)}
+.vdesc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.vpayload{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-family:var(--mono);font-size:10px;color:var(--amber);line-height:1.5;word-break:break-all;margin-bottom:8px}
+.vfix{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:8px 10px;font-size:11px;color:#86efac;line-height:1.5}
+/* SUMMARY */
+.sum-bar{display:none;align-items:center;gap:16px;padding:12px 18px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.sum-bar.on{display:flex}
+.sstat{display:flex;align-items:center;gap:5px;font-size:12px}
+.sstat label{color:var(--text3);font-size:11px}.sstat strong{color:var(--text1);font-weight:600}
+/* RIGHT */
+.right-panel{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.right-panel::-webkit-scrollbar{width:4px}
+.right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.rsec{border-bottom:1px solid var(--border);padding:14px}
+.rsec:last-child{border-bottom:none}
+.rsec-title{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--text3);margin-bottom:10px}
+.rempty{display:flex;flex-direction:column;align-items:center;padding:8px 0;opacity:.4}
+.rempty p{font-size:10px;color:var(--text3);text-align:center}
+.cov-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.cov-id{font-family:var(--mono);font-size:9px;color:var(--text3);width:42px;flex-shrink:0}
+.cov-bg{flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.cov-bar{height:100%;border-radius:99px;background:var(--blue);transition:width .6s}
+.cov-bar.v{background:var(--red)}
+.cov-n{font-family:var(--mono);font-size:9px;color:var(--text3);width:20px;text-align:right;flex-shrink:0}
+.lb-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-family:var(--mono);font-size:9px;color:var(--text3);width:16px;flex-shrink:0}
+.lb-name{font-size:11px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-score{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue);flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .25s ease forwards}
+@media(max-width:900px){body{overflow:auto}.app{height:auto}.main{grid-template-columns:1fr}.right-panel{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <a href="/" class="logo">
+    <div class="logo-icon">&#9889;</div>
+    <span class="logo-name">EthiHack</span>
+    <span class="logo-ver">v6.0</span>
+  </a>
+  <div class="hdr-badges">
+    <span class="badge">73 SECURITY TESTS</span>
+    <span class="badge">OWASP LLM TOP 10</span>
+    <span class="badge">MITRE ATLAS</span>
+    <span class="badge">NIST AI RMF</span>
+    <span class="badge">AUTO PDF REPORTS</span>
+  </div>
+  <div class="hdr-stats">
+    <div class="stat" id="hdr-scans"><span>0</span> scans</div>
+    <div class="stat" id="hdr-vulns"><span>0</span> vulns found</div>
+  </div>
+</header>
+<div class="main">
+  <!-- LEFT -->
+  <aside class="left-panel">
+    <div class="panel-hdr">
+      <div class="panel-title">TARGET CONFIGURATION</div>
+      <div class="panel-sub">Configure your AI security scan</div>
+    </div>
+    <div class="form-body">
+      <div class="field">
+        <label class="field-label" for="target-url">Target URL <span class="req">*</span></label>
+        <input type="url" id="target-url" placeholder="https://your-ai.com/api/chat" oninput="validateForm()">
+        <div class="field-help">The URL where your AI accepts messages</div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="ai-service">AI Service <span class="req">*</span></label>
+        <select id="ai-service">
+          <option value="">— Select the AI powering it —</option>
+          <option value="openai">ChatGPT / OpenAI</option>
+          <option value="anthropic">Claude by Anthropic</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="groq">Groq — Free &amp; Fast</option>
+          <option value="together">Together AI</option>
+          <option value="cohere">Cohere</option>
+          <option value="ollama">Ollama (local)</option>
+          <option value="lmstudio">LM Studio (local)</option>
+          <option value="azure">Microsoft Azure AI</option>
+          <option value="custom">Custom / Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="ai-name">AI Name</label>
+        <input type="text" id="ai-name" placeholder="e.g. Aria Customer Support Bot">
+        <div class="field-help">Used in your bug bounty report</div>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label class="field-label" for="anthropic-key">Anthropic API Key <span class="req">*</span></label>
+        <input type="password" id="anthropic-key" placeholder="sk-ant-..." oninput="validateForm()">
+        <div class="field-help">Generates adaptive attacks. <a href="https://console.anthropic.com" target="_blank">Get free key &rarr;</a></div>
+      </div>
+      <button class="adv-toggle" onclick="toggleAdv(this)">&#9654; &nbsp;&#9881; Advanced settings</button>
+      <div class="adv-fields" id="adv-fields">
+        <div class="field">
+          <label class="field-label" for="target-key">Target API Key</label>
+          <input type="password" id="target-key" placeholder="API key for the target AI">
+        </div>
+        <div class="field">
+          <label class="field-label" for="model-ver">Model Version</label>
+          <input type="text" id="model-ver" placeholder="e.g. gpt-4o, claude-3-sonnet">
+          <div class="field-help">Leave blank to auto-detect</div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="company-name">Company Name</label>
+          <input type="text" id="company-name" placeholder="For bug bounty report">
+        </div>
+        <div class="field">
+          <label class="field-label" for="bb-link">Bug Bounty Link</label>
+          <input type="url" id="bb-link" placeholder="https://hackerone.com/...">
+        </div>
+      </div>
+      <div class="ethical">&#9888; Only test AI systems you own or that are part of an official bug bounty program.</div>
+      <button class="btn-scan" id="scan-btn" onclick="startScan()" disabled>
+        <span id="scan-icon">&#128737;</span>
+        <span id="scan-text">Start Security Scan</span>
+      </button>
+    </div>
+  </aside>
+  <!-- CENTER -->
+  <main class="center-panel">
+    <div class="center-hdr">
+      <div class="center-title">SECURITY TEST RESULTS</div>
+      <div class="score" id="score-display">&#8212;/100</div>
+      <div class="center-actions">
+        <button class="btn-sm" id="share-btn" onclick="shareResults()" style="display:none">&#128279; Share</button>
+        <a class="btn-sm" id="report-btn" href="#" style="display:none">&#128196; PDF Report</a>
+      </div>
+    </div>
+    <div class="results-body" id="results-body">
+      <div class="empty" id="empty-state">
+        <div class="empty-icon">&#128737;</div>
+        <div class="empty-title">Ready to find security holes</div>
+        <div class="empty-sub">Configure your target on the left and click Start Security Scan. Results appear in real time.</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Paste your AI URL + API key</div>
+              <div class="step-desc">Any AI endpoint — ChatGPT, Claude, custom webhook.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">We fire 73 adaptive attack chains</div>
+              <div class="step-desc">3-turn conversations that escalate like real attackers. Turn 3 generated live by Claude.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Get your score + PDF report</div>
+              <div class="step-desc">CVSS scored. OWASP mapped. Bug bounty ready.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scan-log" id="scan-log"></div>
+      <div class="vuln-cards" id="vuln-cards"></div>
+    </div>
+    <div class="sum-bar" id="sum-bar">
+      <div class="sstat"><span style="color:var(--red)">&#9679;</span>&nbsp;<strong id="sum-crit">0</strong><label>&nbsp;Critical</label></div>
+      <div class="sstat"><span style="color:var(--amber)">&#9679;</span>&nbsp;<strong id="sum-high">0</strong><label>&nbsp;High</label></div>
+      <div class="sstat"><span style="color:var(--green)">&#9679;</span>&nbsp;<strong id="sum-pass">0</strong><label>&nbsp;Passed</label></div>
+      <div style="flex:1"></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3)" id="sum-id"></div>
+    </div>
+  </main>
+  <!-- RIGHT -->
+  <aside class="right-panel">
+    <div class="rsec">
+      <div class="rsec-title">ATTACK COVERAGE</div>
+      <div id="cov-grid"><div class="rempty"><p>Coverage map appears after scan</p></div></div>
+    </div>
+    <div class="rsec">
+      <div class="rsec-title">FIX SUGGESTIONS</div>
+      <div id="fix-content"><div class="rempty"><p>Remediation appears after vulnerabilities are found</p></div></div>
+    </div>
+    <div class="rsec" id="bb-sec" style="display:none">
+      <div class="rsec-title">BUG BOUNTY REPORT</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ready for HackerOne, Bugcrowd, Intigriti</div>
+      <button class="btn-sm" style="width:100%;margin-bottom:5px;justify-content:center" onclick="copyReport()">&#128203; Copy Report</button>
+    </div>
+    <div class="rsec">
+      <div class="rsec-title">LEADERBOARD</div>
+      <div id="lb-content"><div class="rempty"><p>Loading...</p></div></div>
+    </div>
+  </aside>
+</div>
+</div>
+<script>
+let isScanning=false,currentResults=[],currentScanId=null;
+document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLeaderboard();validateForm()});
+function validateForm(){
+  const url=document.getElementById('target-url').value.trim();
+  const key=document.getElementById('anthropic-key').value.trim();
+  document.getElementById('scan-btn').disabled=!url||!key||isScanning;
+}
+function toggleAdv(btn){
+  const f=document.getElementById('adv-fields');
+  f.classList.toggle('open');
+  btn.innerHTML=f.classList.contains('open')?'&#9660; &nbsp;&#9881; Advanced settings':'&#9654; &nbsp;&#9881; Advanced settings';
+}
+async function startScan(){
+  if(isScanning)return;
+  const url=document.getElementById('target-url').value.trim();
+  const key=document.getElementById('anthropic-key').value.trim();
+  const service=document.getElementById('ai-service').value;
+  const name=document.getElementById('ai-name').value.trim();
+  const tkey=document.getElementById('target-key').value.trim();
+  const model=document.getElementById('model-ver').value.trim();
+  const company=document.getElementById('company-name').value.trim();
+  const bblink=document.getElementById('bb-link').value.trim();
+  if(!url||!key)return;
+  isScanning=true;currentResults=[];
+  document.getElementById('scan-btn').disabled=true;
+  document.getElementById('scan-icon').textContent='⏳';
+  document.getElementById('scan-text').textContent='Scanning…';
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('vuln-cards').className='vuln-cards';
+  document.getElementById('sum-bar').className='sum-bar';
+  document.getElementById('share-btn').style.display='none';
+  document.getElementById('report-btn').style.display='none';
+  document.getElementById('bb-sec').style.display='none';
+  document.getElementById('score-display').textContent='—/100';
+  document.getElementById('score-display').className='score';
+  document.getElementById('vuln-cards').innerHTML='';
+  const log=document.getElementById('scan-log');
+  log.innerHTML='';log.className='scan-log on';
+  addLog('info','> Connecting to '+url);
+  addLog('','> Loading 73 attack modules across 10 categories…');
+  try{
+    const payload={target_url:url,anthropic_key:key,target_name:name||'Target AI',target_type:service||'custom'};
+    if(tkey)payload.target_api_key=tkey;
+    if(model)payload.model_version=model;
+    if(company)payload.company_name=company;
+    if(bblink)payload.bug_bounty_link=bblink;
+    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));addLog('fail','> Error: '+(e.detail||res.statusText));resetBtn();return}
+    const reader=res.body&&res.body.getReader();
+    if(reader){
+      const dec=new TextDecoder();let buf='';
+      while(true){
+        const{done,value}=await reader.read();
+        if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n');buf=lines.pop();
+        for(const line of lines){
+          const t=line.trim();
+          if(!t||t==='data: [DONE]')continue;
+          const raw=t.startsWith('data: ')?t.slice(6):t;
+          try{handleEvent(JSON.parse(raw))}catch{}
+        }
+      }
+    }else{handleFinal(await res.json())}
+  }catch(e){addLog('fail','> Error: '+e.message)}
+  resetBtn();
+}
+function handleEvent(d){
+  if(d.type==='test_start')addLog('','> ['+d.test_id+'] '+d.test_name+'…');
+  else if(d.type==='test_result'){
+    const r=d.result;
+    if(r.vulnerable)addLog('fail','  ↳ VULNERABLE — '+(r.response||'').slice(0,80));
+    else addLog('ok','  ↳ SECURE ✓');
+    currentResults.push(r);renderCard(r);
+  }else if(d.type==='complete'||d.overall_score!==undefined)handleFinal(d);
+  else if(d.type==='log')addLog('',`> ${d.message}`);
+}
+function handleFinal(d){
+  const score=d.overall_score??0;
+  const vulns=d.vulnerabilities||d.results||currentResults;
+  addLog('info','> Done. Score: '+score+'/100 | '+(d.total_vulnerabilities||0)+' vulnerabilities ⚡');
+  const sel=document.getElementById('score-display');
+  sel.textContent=score+'/100';
+  sel.className='score '+(score>=80?'good':score>=60?'med':'bad');
+  setTimeout(()=>{
+    document.getElementById('scan-log').className='scan-log';
+    document.getElementById('vuln-cards').className='vuln-cards on';
+    document.getElementById('sum-bar').className='sum-bar on';
+  },500);
+  let crit=0,high=0,pass=0;
+  (vulns||[]).forEach(r=>{
+    if(!r.vulnerable){pass++;return}
+    const s=(r.severity||'').toLowerCase();
+    if(s==='critical')crit++;else if(s==='high')high++;
+  });
+  document.getElementById('sum-crit').textContent=crit;
+  document.getElementById('sum-high').textContent=high;
+  document.getElementById('sum-pass').textContent=pass;
+  renderCoverage(vulns||[]);
+  renderFixes(vulns||[]);
+  if(crit>0||high>0)document.getElementById('bb-sec').style.display='block';
+  if(d.share_id){
+    currentScanId=d.share_id;
+    document.getElementById('share-btn').style.display='flex';
+    document.getElementById('sum-id').textContent='ID: '+d.share_id;
+  }
+  const pdf=d.report_url||(d.share_id?'/report/'+d.share_id:null);
+  if(pdf){const b=document.getElementById('report-btn');b.href=pdf;b.style.display='flex'}
+  loadStats();
+}
+function renderCard(r){
+  const c=document.getElementById('vuln-cards');
+  const sev=(r.severity||'low').toLowerCase();
+  const sc=r.vulnerable?sev:'secure';
+  const el=document.createElement('div');
+  el.className='vcard '+sc+' fade-up';
+  el.innerHTML=`<div class="vhdr" onclick="toggleCard(this)">
+    <div class="vid">${r.test_id||r.id||'—'}</div>
+    <div class="vname">${r.test_name||r.name||'Security Test'}</div>
+    <div class="vsev ${sc}">${r.vulnerable?sev.toUpperCase():'SECURE'}</div>
+  </div>${r.vulnerable?`<div class="vbody">
+    <div class="vmeta">
+      <div class="vtag">OWASP <span>${r.owasp_id||'—'}</span></div>
+      <div class="vtag">CVSS <span>${r.cvss?.score||r.cvss_score||'—'}</span></div>
+      <div class="vtag">MITRE <span>${r.mitre_id||'—'}</span></div>
+    </div>
+    ${r.description?`<div class="vdesc">${esc(r.description)}</div>`:''}
+    ${r.payload?`<div class="vpayload">${esc(r.payload)}</div>`:''}
+    ${r.remediation?`<div class="vfix">💡 ${esc(r.remediation)}</div>`:''}
+  </div>`:''}`;
+  c.appendChild(el);
+}
+function toggleCard(h){const b=h.nextElementSibling;if(b)b.classList.toggle('open')}
+function renderCoverage(results){
+  const g=document.getElementById('cov-grid');
+  const cats={};
+  results.forEach(r=>{const id=r.owasp_id||'Other';if(!cats[id])cats[id]={t:0,v:0};cats[id].t++;if(r.vulnerable)cats[id].v++});
+  if(!Object.keys(cats).length)return;
+  const mx=Math.max(...Object.values(cats).map(c=>c.t),1);
+  g.innerHTML=Object.entries(cats).map(([id,c])=>`
+    <div class="cov-row">
+      <div class="cov-id">${id}</div>
+      <div class="cov-bg"><div class="cov-bar ${c.v>0?'v':''}" style="width:${(c.t/mx*100).toFixed(0)}%"></div></div>
+      <div class="cov-n">${c.t}</div>
+    </div>`).join('');
+}
+function renderFixes(results){
+  const vulns=results.filter(r=>r.vulnerable&&r.remediation);
+  if(!vulns.length)return;
+  document.getElementById('fix-content').innerHTML=vulns.slice(0,4).map(r=>`
+    <div class="vfix" style="margin-bottom:6px">
+      <strong style="font-size:10px;display:block;margin-bottom:3px;color:var(--text1)">${r.test_name||r.name}</strong>
+      ${esc(r.remediation)}
+    </div>`).join('');
+}
+function addLog(type,text){
+  const log=document.getElementById('scan-log');
+  const s=document.createElement('span');
+  s.className='ll '+type;s.textContent=text;
+  log.appendChild(s);log.scrollTop=log.scrollHeight;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function resetBtn(){
+  isScanning=false;
+  document.getElementById('scan-btn').disabled=false;
+  document.getElementById('scan-icon').textContent='🛡';
+  document.getElementById('scan-text').textContent='Start Security Scan';
+  validateForm();
+}
+async function shareResults(){
+  if(!currentScanId)return;
+  await navigator.clipboard.writeText(location.origin+'/results/'+currentScanId).catch(()=>{});
+  const b=document.getElementById('share-btn');
+  const o=b.innerHTML;b.innerHTML='✓ Copied!';
+  setTimeout(()=>b.innerHTML=o,2000);
+}
+function copyReport(){
+  const text=currentResults.filter(r=>r.vulnerable).map(r=>`[${r.test_id}] ${r.test_name} — ${r.severity}\nOWASP: ${r.owasp_id} | CVSS: ${r.cvss?.score||'—'}\n${r.description||''}\n`).join('\n');
+  navigator.clipboard.writeText(text).catch(()=>{});
+}
+async function loadStats(){
+  try{
+    const r=await fetch('/api/stats');if(!r.ok)return;
+    const d=await r.json();
+    const n=d.total_scans||0;
+    document.getElementById('hdr-scans').innerHTML='<span>'+n+'</span> '+(n===1?'scan':'scans');
+    document.getElementById('hdr-vulns').innerHTML='<span>'+(d.total_vulnerabilities_found||0)+'</span> vulns found';
+  }catch{}
+}
+async function loadLeaderboard(){
+  try{
+    const r=await fetch('/api/leaderboard');if(!r.ok)return;
+    const d=await r.json();
+    const el=document.getElementById('lb-content');
+    if(!d.leaderboard?.length){el.innerHTML='<div class="rempty"><p>No scans yet</p></div>';return}
+    el.innerHTML=d.leaderboard.slice(0,8).map(s=>`<div class="lb-row"><div class="lb-rank">${s.rank}</div><div class="lb-name">${esc(s.target_name)}</div><div class="lb-score">${s.score}</div></div>`).join('');
+  }catch{}
+}
+</script>
+</body>
+</html>
