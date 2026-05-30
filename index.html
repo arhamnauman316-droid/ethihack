@@ -241,41 +241,45 @@ select option{background:var(--s2)}
 </div>
 <script>
 let scanning=false,results=[],scanId=null;
-document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLB()});
+document.addEventListener('DOMContentLoaded',function(){loadStats();loadLB();});
 
 function checkBtn(){
-  const url=document.getElementById('target-url').value.trim();
-  document.getElementById('scan-btn').disabled=!url||scanning;
+  var url=document.getElementById('target-url').value.trim();
+  document.getElementById('scan-btn').disabled=(!url||scanning);
 }
 
 function toggleAdv(btn){
-  const f=document.getElementById('adv');
+  var f=document.getElementById('adv');
   f.classList.toggle('open');
-  btn.innerHTML=f.classList.contains('open')?'&#9660; &#9881; Advanced settings':'&#9654; &#9881; Advanced settings';
+  btn.textContent=f.classList.contains('open')?'▼ ⚙ Advanced settings':'▶ ⚙ Advanced settings';
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 function addLog(type,text){
-  const log=document.getElementById('log');
-  const s=document.createElement('span');
-  s.className='ll '+type;s.textContent=text;
-  log.appendChild(s);log.scrollTop=log.scrollHeight;
+  var log=document.getElementById('log');
+  var s=document.createElement('span');
+  s.className='ll '+type;
+  s.textContent=text;
+  log.appendChild(s);
+  log.scrollTop=log.scrollHeight;
 }
 
 async function startScan(){
   if(scanning)return;
-  const url=document.getElementById('target-url').value.trim();
+  var url=document.getElementById('target-url').value.trim();
   if(!url)return;
-  const service=document.getElementById('ai-service').value;
-  const tkey=document.getElementById('target-key').value.trim();
-  const model=document.getElementById('model-ver').value.trim();
-  const company=document.getElementById('company').value.trim();
+  var service=document.getElementById('ai-service').value;
+  var tkey=document.getElementById('target-key').value.trim();
+  var model=document.getElementById('model-ver').value.trim();
+  var company=document.getElementById('company').value.trim();
 
   scanning=true;results=[];scanId=null;
   document.getElementById('scan-btn').disabled=true;
-  document.getElementById('scan-icon').textContent='&#9203;';
-  document.getElementById('scan-txt').textContent='Scanning…';
+  document.getElementById('scan-icon').textContent='⌛';
+  document.getElementById('scan-txt').textContent='Scanning...';
   document.getElementById('empty').style.display='none';
   document.getElementById('cards').innerHTML='';
   document.getElementById('cards').className='vcards';
@@ -285,13 +289,14 @@ async function startScan(){
   document.getElementById('bb-sec').style.display='none';
   document.getElementById('score').textContent='0/100';
   document.getElementById('score').className='score';
-  const log=document.getElementById('log');
-  log.innerHTML='';log.className='scan-log on';
+  var log=document.getElementById('log');
+  log.innerHTML='';
+  log.className='scan-log on';
   addLog('info','> Connecting to '+url);
-  addLog('','> Loading 73 attack modules…');
+  addLog('','> Loading 73 attack modules...');
 
   try{
-    const payload={
+    var payload={
       target_url:url,
       anthropic_key:'',
       target_name:'Target AI',
@@ -302,67 +307,63 @@ async function startScan(){
     };
     if(company)payload.company_name=company;
 
-    // Step 1: POST to start scan
-    const r1=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var r1=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r1.ok){
-      const e=await r1.json().catch(()=>({}));
-      addLog('fail','> Failed to start: '+(JSON.stringify(e.detail||e)));
+      var e=await r1.json().catch(function(){return {};});
+      addLog('fail','> Failed: '+JSON.stringify(e.detail||e));
       resetBtn();return;
     }
-    const j=await r1.json();
+    var j=await r1.json();
     scanId=j.scan_id;
     if(!scanId){addLog('fail','> No scan ID returned');resetBtn();return;}
-    addLog('info','> Scan '+scanId+' started — streaming results…');
+    addLog('info','> Scan '+scanId+' started - streaming results...');
 
-    // Step 2: Stream results
-    const r2=await fetch('/api/stream/'+scanId);
+    var r2=await fetch('/api/stream/'+scanId);
     if(!r2.ok){addLog('fail','> Stream failed');resetBtn();return;}
-    const reader=r2.body.getReader();
-    const dec=new TextDecoder();
-    let buf='';
+    var reader=r2.body.getReader();
+    var dec=new TextDecoder();
+    var buf='';
     while(true){
-      const{done,value}=await reader.read();
-      if(done)break;
-      buf+=dec.decode(value,{stream:true});
-      const lines=buf.split('\n');buf=lines.pop();
-      for(const line of lines){
-        const t=line.trim();
+      var chunk=await reader.read();
+      if(chunk.done)break;
+      buf+=dec.decode(chunk.value,{stream:true});
+      var lines=buf.split('\n');
+      buf=lines.pop();
+      for(var i=0;i<lines.length;i++){
+        var t=lines[i].trim();
         if(!t||t==='data: [DONE]')continue;
-        const raw=t.startsWith('data: ')?t.slice(6):t;
-        try{onEvent(JSON.parse(raw));}catch{}
+        var raw=t.startsWith('data: ')?t.slice(6):t;
+        try{onEvent(JSON.parse(raw));}catch(ex){}
       }
     }
-  }catch(e){addLog('fail','> Error: '+e.message);}
+  }catch(err){addLog('fail','> Error: '+err.message);}
   resetBtn();
 }
 
 function onEvent(d){
   if(!d||!d.type)return;
-  switch(d.type){
-    case 'phase': addLog('info','> '+d.message);break;
-    case 'fingerprint': addLog('','> Model: '+(d.model||'Detected'));break;
-    case 'intel': addLog('info','> '+d.message);break;
-    case 'agent_mode': if(d.message)addLog('','> '+d.message);break;
-    case 'attack_start': addLog('','> ['+d.index+'/'+d.total+'] Testing '+d.name+'...');break;
-    case 'attack_result':
-      results.push(d);
-      if(d.vulnerable){addLog('fail','  VULNERABLE ['+d.owasp_id+'] '+(d.explanation||'').slice(0,80));}
-      else{addLog('ok','  SECURE: '+d.name);}
-      renderCard(d);
-      break;
-    case 'complete': onComplete(d);break;
-    case 'error': addLog('fail','> Error: '+d.message);resetBtn();break;
-    case 'done': case 'keepalive': break;
+  if(d.type==='phase'){addLog('info','> '+d.message);}
+  else if(d.type==='fingerprint'){addLog('','> Model: '+(d.model||'Detected'));}
+  else if(d.type==='intel'){addLog('info','> '+d.message);}
+  else if(d.type==='agent_mode'){if(d.message)addLog('','> '+d.message);}
+  else if(d.type==='attack_start'){addLog('','> ['+d.index+'/'+d.total+'] '+d.name+'...');}
+  else if(d.type==='attack_result'){
+    results.push(d);
+    if(d.vulnerable){addLog('fail','  VULNERABLE ['+d.owasp_id+'] '+(d.explanation||'').slice(0,80));}
+    else{addLog('ok','  SECURE: '+d.name);}
+    renderCard(d);
   }
+  else if(d.type==='complete'){onComplete(d);}
+  else if(d.type==='error'){addLog('fail','> Error: '+d.message);resetBtn();}
 }
 
 function onComplete(d){
-  const score=d.score||0;
-  addLog('info','> Done. Score: '+score+'/100 | '+(d.vulnerabilities||0)+' vulnerabilities found');
-  const sel=document.getElementById('score');
+  var score=d.score||0;
+  addLog('info','> Done. Score: '+score+'/100');
+  var sel=document.getElementById('score');
   sel.textContent=score+'/100';
   sel.className='score '+(score>=80?'good':score>=60?'med':'bad');
-  setTimeout(()=>{
+  setTimeout(function(){
     document.getElementById('log').className='scan-log';
     document.getElementById('cards').className='vcards on';
     document.getElementById('sbar').className='sbar on';
@@ -374,97 +375,107 @@ function onComplete(d){
   if((d.critical||0)>0||(d.high||0)>0)document.getElementById('bb-sec').style.display='block';
   if(scanId){
     document.getElementById('share-btn').style.display='flex';
-    const rb=document.getElementById('report-btn');
+    var rb=document.getElementById('report-btn');
     rb.href='/api/report/'+scanId;rb.style.display='flex';
   }
   loadStats();loadLB();
 }
 
 function renderCard(r){
-  const rawSev=r.severity||0;
-  const sev=rawSev>=8?'critical':rawSev>=5?'high':rawSev>=3?'medium':'low';
-  const sc=r.vulnerable?sev:'secure';
-  const el=document.createElement('div');
+  var rawSev=r.severity||0;
+  var sev=rawSev>=8?'critical':rawSev>=5?'high':rawSev>=3?'medium':'low';
+  var sc=r.vulnerable?sev:'secure';
+  var el=document.createElement('div');
   el.className='vcard '+sc+' fu';
-  el.innerHTML=
-    '<div class="vhdr" onclick="this.nextElementSibling&&this.nextElementSibling.classList.toggle('open')">'+
-    '<div class="vid">'+(r.owasp_id||'')+'</div>'+
-    '<div class="vname">'+esc(r.name||'Security Test')+'</div>'+
-    '<div class="vsev '+sc+'">'+(r.vulnerable?sev.toUpperCase()+' '+rawSev+'/10':'SECURE')+'</div>'+
-    '</div>'+
-    (r.vulnerable?
-    '<div class="vbody">'+
-    '<div class="vmeta">'+
-    '<div class="vtag">OWASP <span>'+(r.owasp_id||'')+'</span></div>'+
-    '<div class="vtag">MITRE <span>'+(r.mitre_id||'')+'</span></div>'+
-    '<div class="vtag">CVSS <span>'+(r.cvss&&r.cvss.score||rawSev)+'</span></div>'+
-    '</div>'+
-    (r.explanation?'<div class="vdesc">'+esc(r.explanation)+'</div>':'')+
-    '</div>':'');
+  var hdr=document.createElement('div');
+  hdr.className='vhdr';
+  var vid=document.createElement('div');vid.className='vid';vid.textContent=r.owasp_id||'';
+  var vname=document.createElement('div');vname.className='vname';vname.textContent=r.name||'Test';
+  var vsev=document.createElement('div');vsev.className='vsev '+sc;
+  vsev.textContent=r.vulnerable?sev.toUpperCase()+' '+rawSev+'/10':'SECURE';
+  hdr.appendChild(vid);hdr.appendChild(vname);hdr.appendChild(vsev);
+  el.appendChild(hdr);
+  if(r.vulnerable){
+    var body=document.createElement('div');
+    body.className='vbody';
+    var meta=document.createElement('div');meta.className='vmeta';
+    var t1=document.createElement('div');t1.className='vtag';t1.innerHTML='OWASP <span>'+esc(r.owasp_id||'')+'</span>';
+    var t2=document.createElement('div');t2.className='vtag';t2.innerHTML='CVSS <span>'+(rawSev)+'</span>';
+    meta.appendChild(t1);meta.appendChild(t2);
+    body.appendChild(meta);
+    if(r.explanation){var desc=document.createElement('div');desc.className='vdesc';desc.textContent=r.explanation;body.appendChild(desc);}
+    hdr.onclick=function(){body.classList.toggle('open');};
+    el.appendChild(body);
+  }
   document.getElementById('cards').appendChild(el);
 }
 
 function renderCov(){
-  const cats={};
-  results.forEach(r=>{const id=r.owasp_id||'Other';if(!cats[id])cats[id]={t:0,v:0};cats[id].t++;if(r.vulnerable)cats[id].v++;});
-  if(!Object.keys(cats).length)return;
-  const mx=Math.max(...Object.values(cats).map(c=>c.t),1);
-  document.getElementById('cov').innerHTML=Object.entries(cats).map(([id,c])=>
-    '<div class="cov-row"><div class="cov-id">'+id+'</div><div class="cov-bg"><div class="cov-bar'+(c.v>0?' v':'')+'" style="width:'+Math.round(c.t/mx*100)+'%"></div></div><div class="cov-n">'+c.t+'</div></div>'
-  ).join('');
+  var cats={};
+  results.forEach(function(r){var id=r.owasp_id||'Other';if(!cats[id])cats[id]={t:0,v:0};cats[id].t++;if(r.vulnerable)cats[id].v++;});
+  var keys=Object.keys(cats);
+  if(!keys.length)return;
+  var mx=1;keys.forEach(function(k){if(cats[k].t>mx)mx=cats[k].t;});
+  var html='';
+  keys.forEach(function(k){
+    var c=cats[k];
+    html+='<div class="cov-row"><div class="cov-id">'+k+'</div><div class="cov-bg"><div class="cov-bar'+(c.v>0?' v':'')+'" style="width:'+Math.round(c.t/mx*100)+'%"></div></div><div class="cov-n">'+c.t+'</div></div>';
+  });
+  document.getElementById('cov').innerHTML=html;
 }
 
 function renderFix(){
-  const vulns=results.filter(r=>r.vulnerable&&r.explanation);
+  var vulns=results.filter(function(r){return r.vulnerable&&r.explanation;});
   if(!vulns.length)return;
-  document.getElementById('fixes').innerHTML=vulns.slice(0,4).map(r=>
-    '<div class="vfix"><strong style="font-size:10px;display:block;margin-bottom:3px;color:var(--t1)">'+esc(r.name)+'</strong>'+esc(r.explanation.slice(0,200))+'</div>'
-  ).join('');
+  var html='';
+  vulns.slice(0,4).forEach(function(r){
+    html+='<div class="vfix"><strong style="font-size:10px;display:block;margin-bottom:3px;color:var(--t1)">'+esc(r.name)+'</strong>'+esc(r.explanation.slice(0,200))+'</div>';
+  });
+  document.getElementById('fixes').innerHTML=html;
 }
 
 function resetBtn(){
   scanning=false;
   document.getElementById('scan-btn').disabled=false;
-  document.getElementById('scan-icon').textContent='&#128737;';
+  document.getElementById('scan-icon').textContent='🛡';
   document.getElementById('scan-txt').textContent='Start Security Scan';
   checkBtn();
 }
 
 async function shareRes(){
   if(!scanId)return;
-  await navigator.clipboard.writeText(location.origin+'/api/report/'+scanId).catch(()=>{});
-  const b=document.getElementById('share-btn');
-  const o=b.innerHTML;b.innerHTML='&#10003; Copied!';
-  setTimeout(()=>b.innerHTML=o,2000);
+  await navigator.clipboard.writeText(location.origin+'/api/report/'+scanId).catch(function(){});
+  var b=document.getElementById('share-btn');
+  var o=b.innerHTML;b.innerHTML='✓ Copied!';
+  setTimeout(function(){b.innerHTML=o;},2000);
 }
 
 function copyRep(){
-  const text=results.filter(r=>r.vulnerable).map(r=>'['+r.owasp_id+'] '+r.name+' - Severity: '+r.severity+'/10
-'+r.explanation+'
-').join('
-');
-  navigator.clipboard.writeText(text).catch(()=>{});
+  var text=results.filter(function(r){return r.vulnerable;}).map(function(r){return '['+r.owasp_id+'] '+r.name+' - '+r.severity+'/10';}).join('\n');
+  navigator.clipboard.writeText(text).catch(function(){});
 }
 
 async function loadStats(){
   try{
-    const r=await fetch('/api/stats');if(!r.ok)return;
-    const d=await r.json();
-    const n=d.total_scans||0;
+    var r=await fetch('/api/stats');if(!r.ok)return;
+    var d=await r.json();
+    var n=d.total_scans||0;
     document.getElementById('hdr-scans').innerHTML='<span>'+n+'</span> '+(n===1?'scan':'scans');
     document.getElementById('hdr-vulns').innerHTML='<span>'+(d.total_vulnerabilities_found||0)+'</span> vulns';
-  }catch{}
+  }catch(e){}
 }
 
 async function loadLB(){
   try{
-    const r=await fetch('/api/leaderboard');if(!r.ok)return;
-    const d=await r.json();
+    var r=await fetch('/api/leaderboard');if(!r.ok)return;
+    var d=await r.json();
     if(!d.leaderboard||!d.leaderboard.length)return;
-    document.getElementById('lb').innerHTML=d.leaderboard.slice(0,6).map(s=>
-      '<div class="lb-row"><div class="lb-rank">'+s.rank+'</div><div class="lb-name">'+esc(s.target_name)+'</div><div class="lb-score">'+s.score+'</div></div>'
-    ).join('');
-  }catch{}
+    var html='';
+    d.leaderboard.slice(0,6).forEach(function(s){
+      html+='<div class="lb-row"><div class="lb-rank">'+s.rank+'</div><div class="lb-name">'+esc(s.target_name)+'</div><div class="lb-score">'+s.score+'</div></div>';
+    });
+    document.getElementById('lb').innerHTML=html;
+  }catch(e){}
 }
 </script>
 </body>
