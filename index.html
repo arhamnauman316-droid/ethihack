@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLeaderboard();
 function validateForm(){
   const url=document.getElementById('target-url').value.trim();
   const key=document.getElementById('anthropic-key').value.trim();
-  document.getElementById('scan-btn').disabled=!url||!key||isScanning;
+  document.getElementById('scan-btn').disabled=!url||isScanning;
 }
 function toggleAdv(btn){
   const f=document.getElementById('adv-fields');
