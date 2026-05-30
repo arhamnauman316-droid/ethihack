@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <title>Web Recon Tool</title>
+</head>
+<body>
+  <h2>🔎 Web Recon Tool (Python + Flask)</h2>
+  <form method="POST">
+    <input type="text" name="domain" placeholder="Enter a domain" required>
+    <button type="submit">Scan</button>
+  </form>
+
+  {% if info %}
+    <h3>🌐 IP Address:</h3>
+    <p>{{ info.ip }}</p>
+
+    <h3>📋 WHOIS Info:</h3>
+    {% if info.whois != 'WHOIS failed' %}
+      <ul>
+        <li>Registrar: {{ info.whois.registrar }}</li>
+        <li>Created: {{ info.whois.creation_date }}</li>
+        <li>Expires: {{ info.whois.expiration_date }}</li>
+      </ul>
+    {% else %}
+      <p>WHOIS lookup failed.</p>
+    {% endif %}
+
+    <h3>📡 DNS Records:</h3>
+    {% for type, records in info.dns.items() %}
+      <strong>{{ type }}:</strong>
+      <ul>
+        {% for rec in records %}
+          <li>{{ rec }}</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>
