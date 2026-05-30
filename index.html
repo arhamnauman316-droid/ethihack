@@ -307,11 +307,11 @@ async function startScan(){
   const url=document.getElementById('target-url').value.trim();
   const service=document.getElementById('ai-service').value;
   const name='';
-  const tkey=document.getElementById('target-key').value.trim();
-  const model=document.getElementById('model-ver').value.trim();
-  const company=document.getElementById('company-name').value.trim();
-  const bblink=document.getElementById('bb-link').value.trim();
-  if(!url||!key)return;
+  const tkey='';
+  const model='';
+  const company='';
+  const bblink='';
+  if(!url)return;
   isScanning=true;currentResults=[];
   document.getElementById('scan-btn').disabled=true;
   document.getElementById('scan-icon').textContent='⏳';
