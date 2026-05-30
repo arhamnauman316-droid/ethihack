@@ -4,138 +4,119 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EthiHack — AI Security Testing</title>
-<meta name="description" content="Red-team your AI before attackers do. OWASP LLM Top 10. Free.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{background:#080b0f;color:#e2e8f0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;overflow:hidden}
+body{background:#080b0f;color:#e2e8f0;font-family:Inter,sans-serif;font-size:13px;line-height:1.5;overflow:hidden}
 :root{
-  --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);--blue-border:rgba(59,130,246,0.3);
-  --green:#22c55e;--green-dim:rgba(34,197,94,0.1);--red:#ef4444;--red-dim:rgba(239,68,68,0.1);
-  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);
-  --surface:#0d1117;--surface2:#161b22;--surface3:#1c2128;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
-  --text1:#e2e8f0;--text2:#94a3b8;--text3:#475569;
-  --mono:'JetBrains Mono',monospace;
-}
+--blue:#3b82f6;--blue-dim:rgba(59,130,246,.12);--blue-b:rgba(59,130,246,.3);
+--green:#22c55e;--green-dim:rgba(34,197,94,.1);--red:#ef4444;--red-dim:rgba(239,68,68,.1);
+--amber:#f59e0b;--amber-dim:rgba(245,158,11,.1);
+--s:#0d1117;--s2:#161b22;--s3:#1c2128;
+--b:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);
+--t1:#e2e8f0;--t2:#94a3b8;--t3:#475569;--mono:"JetBrains Mono",monospace}
 .app{display:grid;grid-template-rows:52px 1fr;height:100vh}
-.main{display:grid;grid-template-columns:320px 1fr 260px;overflow:hidden}
-/* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);gap:16px}
+.main{display:grid;grid-template-columns:300px 1fr 260px;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--s);border-bottom:1px solid var(--b);gap:16px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:28px;height:28px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.logo-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text1)}
-.logo-ver{font-family:var(--mono);font-size:9px;color:var(--blue);background:var(--blue-dim);border:1px solid var(--blue-border);padding:1px 6px;border-radius:3px}
-.hdr-badges{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap}
-.badge{font-family:var(--mono);font-size:9px;color:var(--text3);border:1px solid var(--border);padding:3px 8px;border-radius:3px;letter-spacing:.05em;white-space:nowrap}
-.hdr-stats{display:flex;align-items:center;gap:12px}
-.stat{font-family:var(--mono);font-size:11px;color:var(--text2)}
-.stat span{color:var(--text1);font-weight:600}
-/* PANELS */
-.left-panel{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.left-panel::-webkit-scrollbar{width:4px}
-.left-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.panel-hdr{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
-.panel-title{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--text3);margin-bottom:2px}
-.panel-sub{font-size:12px;font-weight:500;color:var(--text1)}
-.form-body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;flex:1}
+.logo-icon{width:28px;height:28px;background:var(--blue-dim);border:1px solid var(--blue-b);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.logo-name{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:2px;color:var(--t1)}
+.logo-ver{font-family:var(--mono);font-size:9px;color:var(--blue);background:var(--blue-dim);border:1px solid var(--blue-b);padding:1px 6px;border-radius:3px}
+.hbadges{display:flex;align-items:center;gap:6px;flex:1}
+.badge{font-family:var(--mono);font-size:9px;color:var(--t3);border:1px solid var(--b);padding:3px 8px;border-radius:3px;white-space:nowrap}
+.hstats{display:flex;align-items:center;gap:12px}
+.stat{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.stat span{color:var(--t1);font-weight:600}
+.left{background:var(--s);border-right:1px solid var(--b);display:flex;flex-direction:column;overflow-y:auto}
+.left::-webkit-scrollbar{width:3px}
+.left::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.phdr{padding:14px 16px 10px;border-bottom:1px solid var(--b)}
+.ptitle{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--t3);margin-bottom:2px}
+.psub{font-size:12px;font-weight:500;color:var(--t1)}
+.fbody{padding:14px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
 .field{display:flex;flex-direction:column;gap:5px}
-.field-label{font-size:11px;font-weight:500;color:var(--text2)}
-.field-help{font-size:10px;color:var(--text3);font-family:var(--mono)}
-.field-help a{color:var(--blue)}
+.fl{font-size:11px;font-weight:500;color:var(--t2)}
+.fh{font-size:10px;color:var(--t3);font-family:var(--mono)}
 .req{color:var(--blue);margin-left:2px}
-input[type=text],input[type=url],input[type=password],select{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text1);font-family:'Inter',sans-serif;font-size:12px;padding:8px 10px;border-radius:6px;outline:none;transition:border-color .15s;appearance:none}
+input[type=text],input[type=url],input[type=password],select{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-family:Inter,sans-serif;font-size:12px;padding:8px 10px;border-radius:6px;outline:none;transition:border-color .15s;appearance:none}
 input:focus,select:focus{border-color:var(--blue)}
-input::placeholder{color:var(--text3)}
+input::placeholder{color:var(--t3)}
 select{cursor:pointer}
-select option{background:var(--surface2)}
-.divider{height:1px;background:var(--border);margin:2px 0}
-.adv-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 0;border:none;background:none;width:100%;text-align:left;transition:color .15s}
-.adv-toggle:hover{color:var(--text1)}
-.adv-fields{display:none;flex-direction:column;gap:12px;padding-top:4px}
+select option{background:var(--s2)}
+.divider{height:1px;background:var(--b)}
+.adv-btn{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);cursor:pointer;border:none;background:none;padding:2px 0;text-align:left;width:100%}
+.adv-btn:hover{color:var(--t1)}
+.adv-fields{display:none;flex-direction:column;gap:10px}
 .adv-fields.open{display:flex}
-.ethical{display:flex;gap:8px;padding:10px 12px;background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:11px;color:#fbbf24;line-height:1.5}
-.btn-scan{width:100%;background:var(--blue);color:#fff;border:none;padding:11px 16px;border-radius:7px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;letter-spacing:.02em;margin-top:4px}
+.ethical{display:flex;gap:8px;padding:10px 12px;background:var(--amber-dim);border:1px solid rgba(245,158,11,.2);border-radius:6px;font-size:11px;color:#fbbf24;line-height:1.5}
+.btn-scan{width:100%;background:var(--blue);color:#fff;border:none;padding:11px 16px;border-radius:7px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;letter-spacing:.02em}
 .btn-scan:hover{background:#2563eb}
-.btn-scan:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed}
-/* CENTER */
-.center-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--surface2)}
-.center-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
-.center-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3)}
-.score{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text1)}
+.btn-scan:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed}
+.center{display:flex;flex-direction:column;overflow:hidden;background:var(--s2)}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--b);background:var(--s);flex-shrink:0}
+.ctitle{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--t3)}
+.score{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:2px;color:var(--t1)}
 .score.good{color:var(--green)}.score.med{color:var(--amber)}.score.bad{color:var(--red)}
-.center-actions{display:flex;gap:6px}
-.btn-sm{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;text-decoration:none;letter-spacing:.04em}
-.btn-sm:hover{border-color:var(--blue-border);color:var(--blue)}
-.results-body{flex:1;overflow-y:auto;padding:16px 18px}
-.results-body::-webkit-scrollbar{width:4px}
-.results-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-/* EMPTY STATE */
+.cactions{display:flex;gap:6px}
+.bsm{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:4px;border:1px solid var(--b2);background:transparent;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;text-decoration:none}
+.bsm:hover{border-color:var(--blue-b);color:var(--blue)}
+.rbody{flex:1;overflow-y:auto;padding:16px 18px}
+.rbody::-webkit-scrollbar{width:3px}
+.rbody::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 .empty{display:flex;flex-direction:column;align-items:center;padding:40px 24px}
-.empty-icon{width:56px;height:56px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
-.empty-title{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:8px}
-.empty-sub{font-size:12px;color:var(--text2);text-align:center;max-width:280px;line-height:1.6;margin-bottom:28px}
-.steps{display:flex;flex-direction:column;gap:0;width:100%;max-width:320px}
+.eicon{width:56px;height:56px;background:var(--blue-dim);border:1px solid var(--blue-b);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.etitle{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:8px}
+.esub{font-size:12px;color:var(--t2);text-align:center;max-width:280px;line-height:1.6;margin-bottom:28px}
+.steps{display:flex;flex-direction:column;width:100%;max-width:320px}
 .step{display:flex;gap:12px;padding:12px 0;position:relative}
-.step:not(:last-child)::after{content:'';position:absolute;left:14px;top:36px;bottom:0;width:1px;background:var(--border)}
-.step-num{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);flex-shrink:0}
-.step-title{font-size:12px;font-weight:500;color:var(--text1);margin-bottom:2px;padding-top:4px}
-.step-desc{font-size:11px;color:var(--text2);line-height:1.5}
-/* SCAN LOG */
-.scan-log{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--text2);display:none}
+.step:not(:last-child)::after{content:"";position:absolute;left:14px;top:36px;bottom:0;width:1px;background:var(--b)}
+.snum{width:28px;height:28px;background:var(--s3);border:1px solid var(--b2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);flex-shrink:0}
+.stitle{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px;padding-top:4px}
+.sdesc{font-size:11px;color:var(--t2);line-height:1.5}
+.scan-log{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--t2);display:none}
 .scan-log.on{display:block}
-.ll{display:block}.ll.ok{color:var(--green)}.ll.fail{color:var(--red)}.ll.warn{color:var(--amber)}.ll.info{color:var(--blue)}
-/* VULN CARDS */
-.vuln-cards{display:none;flex-direction:column;gap:10px}
-.vuln-cards.on{display:flex}
-.vcard{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s}
-.vcard:hover{border-color:var(--border2)}
+.ll{display:block}.ll.ok{color:var(--green)}.ll.fail{color:var(--red)}.ll.info{color:var(--blue)}
+.vcards{display:none;flex-direction:column;gap:10px}
+.vcards.on{display:flex}
+.vcard{background:var(--s);border:1px solid var(--b);border-radius:8px;overflow:hidden}
 .vcard.critical{border-left:3px solid var(--red)}.vcard.high{border-left:3px solid var(--amber)}
 .vcard.medium{border-left:3px solid var(--blue)}.vcard.secure{border-left:3px solid var(--green)}
 .vhdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
-.vid{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.08em;flex-shrink:0}
-.vname{font-size:12px;font-weight:500;color:var(--text1);flex:1}
-.vsev{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.06em;flex-shrink:0}
+.vid{font-family:var(--mono);font-size:9px;color:var(--t3);flex-shrink:0}
+.vname{font-size:12px;font-weight:500;color:var(--t1);flex:1}
+.vsev{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;flex-shrink:0}
 .vsev.critical{background:var(--red-dim);color:var(--red)}.vsev.high{background:var(--amber-dim);color:var(--amber)}
 .vsev.medium{background:var(--blue-dim);color:var(--blue)}.vsev.secure{background:var(--green-dim);color:var(--green)}
-.vbody{padding:0 14px 12px;display:none;border-top:1px solid var(--border)}
+.vbody{padding:0 14px 12px;display:none;border-top:1px solid var(--b)}
 .vbody.open{display:block;padding-top:10px}
 .vmeta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-.vtag{font-family:var(--mono);font-size:9px;color:var(--text3)}.vtag span{color:var(--text2)}
-.vdesc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
-.vpayload{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-family:var(--mono);font-size:10px;color:var(--amber);line-height:1.5;word-break:break-all;margin-bottom:8px}
-.vfix{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:8px 10px;font-size:11px;color:#86efac;line-height:1.5}
-/* SUMMARY */
-.sum-bar{display:none;align-items:center;gap:16px;padding:12px 18px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
-.sum-bar.on{display:flex}
-.sstat{display:flex;align-items:center;gap:5px;font-size:12px}
-.sstat label{color:var(--text3);font-size:11px}.sstat strong{color:var(--text1);font-weight:600}
-/* RIGHT */
-.right-panel{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.right-panel::-webkit-scrollbar{width:4px}
-.right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.rsec{border-bottom:1px solid var(--border);padding:14px}
+.vtag{font-family:var(--mono);font-size:9px;color:var(--t3)}.vtag span{color:var(--t2)}
+.vdesc{font-size:12px;color:var(--t2);line-height:1.6}
+.sbar{display:none;align-items:center;gap:16px;padding:12px 18px;background:var(--s);border-top:1px solid var(--b);flex-shrink:0}
+.sbar.on{display:flex}
+.ss{display:flex;align-items:center;gap:5px;font-size:12px}
+.ss label{color:var(--t3);font-size:11px}.ss strong{color:var(--t1);font-weight:600}
+.right{background:var(--s);border-left:1px solid var(--b);display:flex;flex-direction:column;overflow-y:auto}
+.right::-webkit-scrollbar{width:3px}
+.right::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.rsec{border-bottom:1px solid var(--b);padding:14px}
 .rsec:last-child{border-bottom:none}
-.rsec-title{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--text3);margin-bottom:10px}
-.rempty{display:flex;flex-direction:column;align-items:center;padding:8px 0;opacity:.4}
-.rempty p{font-size:10px;color:var(--text3);text-align:center}
+.rtitle{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--t3);margin-bottom:10px}
+.rempty{opacity:.4;font-size:10px;color:var(--t3);text-align:center;padding:4px 0}
 .cov-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
-.cov-id{font-family:var(--mono);font-size:9px;color:var(--text3);width:42px;flex-shrink:0}
-.cov-bg{flex:1;height:5px;background:var(--surface3);border-radius:99px;overflow:hidden}
-.cov-bar{height:100%;border-radius:99px;background:var(--blue);transition:width .6s}
-.cov-bar.v{background:var(--red)}
-.cov-n{font-family:var(--mono);font-size:9px;color:var(--text3);width:20px;text-align:right;flex-shrink:0}
-.lb-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.cov-id{font-family:var(--mono);font-size:9px;color:var(--t3);width:42px;flex-shrink:0}
+.cov-bg{flex:1;height:5px;background:var(--s3);border-radius:99px;overflow:hidden}
+.cov-bar{height:100%;border-radius:99px;background:var(--blue)}.cov-bar.v{background:var(--red)}
+.cov-n{font-family:var(--mono);font-size:9px;color:var(--t3);width:20px;text-align:right}
+.lb-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--b)}
 .lb-row:last-child{border-bottom:none}
-.lb-rank{font-family:var(--mono);font-size:9px;color:var(--text3);width:16px;flex-shrink:0}
-.lb-name{font-size:11px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-score{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue);flex-shrink:0}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.lb-rank{font-family:var(--mono);font-size:9px;color:var(--t3);width:16px}
+.lb-name{font-size:11px;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-score{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue)}
+.vfix{background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:4px;padding:8px 10px;font-size:11px;color:#86efac;line-height:1.5;margin-bottom:6px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.fade-up{animation:fadeUp .25s ease forwards}
-@media(max-width:900px){body{overflow:auto}.app{height:auto}.main{grid-template-columns:1fr}.right-panel{display:none}}
+.fu{animation:fadeUp .25s ease forwards}
 </style>
 </head>
 <body>
@@ -146,207 +127,197 @@ select option{background:var(--surface2)}
     <span class="logo-name">EthiHack</span>
     <span class="logo-ver">v6.0</span>
   </a>
-  <div class="hdr-badges">
+  <div class="hbadges">
     <span class="badge">73 SECURITY TESTS</span>
     <span class="badge">OWASP LLM TOP 10</span>
     <span class="badge">MITRE ATLAS</span>
     <span class="badge">NIST AI RMF</span>
-    <span class="badge">AUTO PDF REPORTS</span>
+    <span class="badge">PDF REPORTS</span>
   </div>
-  <div class="hdr-stats">
+  <div class="hstats">
     <div class="stat" id="hdr-scans"><span>0</span> scans</div>
-    <div class="stat" id="hdr-vulns"><span>0</span> vulns found</div>
+    <div class="stat" id="hdr-vulns"><span>0</span> vulns</div>
   </div>
 </header>
 <div class="main">
-  <!-- LEFT -->
-  <aside class="left-panel">
-    <div class="panel-hdr">
-      <div class="panel-title">TARGET CONFIGURATION</div>
-      <div class="panel-sub">Configure your AI security scan</div>
+<aside class="left">
+  <div class="phdr">
+    <div class="ptitle">TARGET CONFIGURATION</div>
+    <div class="psub">Configure your AI security scan</div>
+  </div>
+  <div class="fbody">
+    <div class="field">
+      <label class="fl">Target URL <span class="req">*</span></label>
+      <input type="url" id="target-url" placeholder="https://your-ai.com/api/chat" oninput="checkBtn()">
+      <div class="fh">The URL where your AI accepts messages</div>
     </div>
-    <div class="form-body">
+    <div class="field">
+      <label class="fl">AI Service <span class="req">*</span></label>
+      <select id="ai-service">
+        <option value="">&#8212; Select the AI powering it &#8212;</option>
+        <option value="openai">ChatGPT / OpenAI</option>
+        <option value="anthropic">Claude by Anthropic</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="groq">Groq</option>
+        <option value="together">Together AI</option>
+        <option value="cohere">Cohere</option>
+        <option value="ollama">Ollama (local)</option>
+        <option value="azure">Azure AI</option>
+        <option value="custom">Custom / Other</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <button class="adv-btn" onclick="toggleAdv(this)">&#9654; &#9881; Advanced settings</button>
+    <div class="adv-fields" id="adv">
       <div class="field">
-        <label class="field-label" for="target-url">Target URL <span class="req">*</span></label>
-        <input type="url" id="target-url" placeholder="https://your-ai.com/api/chat" oninput="validateForm()">
-        <div class="field-help">The URL where your AI accepts messages</div>
+        <label class="fl">Target API Key</label>
+        <input type="password" id="target-key" placeholder="API key for the target AI">
       </div>
       <div class="field">
-        <label class="field-label" for="ai-service">AI Service <span class="req">*</span></label>
-        <select id="ai-service">
-          <option value="">— Select the AI powering it —</option>
-          <option value="openai">ChatGPT / OpenAI</option>
-          <option value="anthropic">Claude by Anthropic</option>
-          <option value="gemini">Google Gemini</option>
-          <option value="groq">Groq — Free &amp; Fast</option>
-          <option value="together">Together AI</option>
-          <option value="cohere">Cohere</option>
-          <option value="ollama">Ollama (local)</option>
-          <option value="lmstudio">LM Studio (local)</option>
-          <option value="azure">Microsoft Azure AI</option>
-          <option value="custom">Custom / Other</option>
-        </select>
+        <label class="fl">Model Version</label>
+        <input type="text" id="model-ver" placeholder="e.g. gpt-4o">
       </div>
       <div class="field">
-      </div>
-      <div class="divider"></div>
-      <div class="field">
-      </div>
-      <button class="adv-toggle" onclick="toggleAdv(this)">&#9654; &nbsp;&#9881; Advanced settings</button>
-      <div class="adv-fields" id="adv-fields">
-        <div class="field">
-          <label class="field-label" for="target-key">Target API Key</label>
-          <input type="password" id="target-key" placeholder="API key for the target AI">
-        </div>
-        <div class="field">
-          <label class="field-label" for="model-ver">Model Version</label>
-          <input type="text" id="model-ver" placeholder="e.g. gpt-4o, claude-3-sonnet">
-          <div class="field-help">Leave blank to auto-detect</div>
-        </div>
-        <div class="field">
-          <label class="field-label" for="company-name">Company Name</label>
-        </div>
-        <div class="field">
-          <label class="field-label" for="bb-link">Bug Bounty Link</label>
-          <input type="url" id="bb-link" placeholder="https://hackerone.com/...">
-        </div>
-      </div>
-      <div class="ethical">&#9888; Only test AI systems you own or that are part of an official bug bounty program.</div>
-      <button class="btn-scan" id="scan-btn" onclick="startScan()" disabled>
-        <span id="scan-icon">&#128737;</span>
-        <span id="scan-text">Start Security Scan</span>
-      </button>
-    </div>
-  </aside>
-  <!-- CENTER -->
-  <main class="center-panel">
-    <div class="center-hdr">
-      <div class="center-title">SECURITY TEST RESULTS</div>
-      <div class="score" id="score-display">&#8212;/100</div>
-      <div class="center-actions">
-        <button class="btn-sm" id="share-btn" onclick="shareResults()" style="display:none">&#128279; Share</button>
-        <a class="btn-sm" id="report-btn" href="#" style="display:none">&#128196; PDF Report</a>
+        <label class="fl">Company Name</label>
+        <input type="text" id="company" placeholder="For bug bounty report">
       </div>
     </div>
-    <div class="results-body" id="results-body">
-      <div class="empty" id="empty-state">
-        <div class="empty-icon">&#128737;</div>
-        <div class="empty-title">Ready to find security holes</div>
-        <div class="empty-sub">Configure your target on the left and click Start Security Scan. Results appear in real time.</div>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div>
-              <div class="step-title">Paste your AI URL + API key</div>
-              <div class="step-desc">Any AI endpoint — ChatGPT, Claude, custom webhook.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div>
-              <div class="step-title">We fire 73 adaptive attack chains</div>
-              <div class="step-desc">3-turn conversations that escalate like real attackers. Turn 3 generated live by Claude.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div>
-              <div class="step-title">Get your score + PDF report</div>
-              <div class="step-desc">CVSS scored. OWASP mapped. Bug bounty ready.</div>
-            </div>
-          </div>
-        </div>
+    <div class="ethical">&#9888; Only test AI systems you own or with official bug bounty permission.</div>
+    <button class="btn-scan" id="scan-btn" onclick="startScan()" disabled>
+      <span id="scan-icon">&#128737;</span>
+      <span id="scan-txt">Start Security Scan</span>
+    </button>
+  </div>
+</aside>
+<main class="center">
+  <div class="chdr">
+    <div class="ctitle">SECURITY TEST RESULTS</div>
+    <div class="score" id="score">&#8212;/100</div>
+    <div class="cactions">
+      <button class="bsm" id="share-btn" onclick="shareRes()" style="display:none">&#128279; Share</button>
+      <a class="bsm" id="report-btn" href="#" style="display:none">&#128196; PDF</a>
+    </div>
+  </div>
+  <div class="rbody">
+    <div class="empty" id="empty">
+      <div class="eicon">&#128737;</div>
+      <div class="etitle">Ready to find security holes</div>
+      <div class="esub">Paste your AI URL and click Start Security Scan. Results stream live.</div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><div><div class="stitle">Paste your AI endpoint URL</div><div class="sdesc">Any AI — ChatGPT, Claude, custom webhook.</div></div></div>
+        <div class="step"><div class="snum">2</div><div><div class="stitle">We fire 73 adaptive attack chains</div><div class="sdesc">3-turn conversations that escalate like real attackers.</div></div></div>
+        <div class="step"><div class="snum">3</div><div><div class="stitle">Get your score + PDF report</div><div class="sdesc">CVSS scored. OWASP mapped. Bug bounty ready.</div></div></div>
       </div>
-      <div class="scan-log" id="scan-log"></div>
-      <div class="vuln-cards" id="vuln-cards"></div>
     </div>
-    <div class="sum-bar" id="sum-bar">
-      <div class="sstat"><span style="color:var(--red)">&#9679;</span>&nbsp;<strong id="sum-crit">0</strong><label>&nbsp;Critical</label></div>
-      <div class="sstat"><span style="color:var(--amber)">&#9679;</span>&nbsp;<strong id="sum-high">0</strong><label>&nbsp;High</label></div>
-      <div class="sstat"><span style="color:var(--green)">&#9679;</span>&nbsp;<strong id="sum-pass">0</strong><label>&nbsp;Passed</label></div>
-      <div style="flex:1"></div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3)" id="sum-id"></div>
-    </div>
-  </main>
-  <!-- RIGHT -->
-  <aside class="right-panel">
-    <div class="rsec">
-      <div class="rsec-title">ATTACK COVERAGE</div>
-      <div id="cov-grid"><div class="rempty"><p>Coverage map appears after scan</p></div></div>
-    </div>
-    <div class="rsec">
-      <div class="rsec-title">FIX SUGGESTIONS</div>
-      <div id="fix-content"><div class="rempty"><p>Remediation appears after vulnerabilities are found</p></div></div>
-    </div>
-    <div class="rsec" id="bb-sec" style="display:none">
-      <div class="rsec-title">BUG BOUNTY REPORT</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ready for HackerOne, Bugcrowd, Intigriti</div>
-      <button class="btn-sm" style="width:100%;margin-bottom:5px;justify-content:center" onclick="copyReport()">&#128203; Copy Report</button>
-    </div>
-    <div class="rsec">
-      <div class="rsec-title">LEADERBOARD</div>
-      <div id="lb-content"><div class="rempty"><p>Loading...</p></div></div>
-    </div>
-  </aside>
+    <div class="scan-log" id="log"></div>
+    <div class="vcards" id="cards"></div>
+  </div>
+  <div class="sbar" id="sbar">
+    <div class="ss"><span style="color:var(--red)">&#9679;</span>&nbsp;<strong id="sc">0</strong><label>&nbsp;Critical</label></div>
+    <div class="ss"><span style="color:var(--amber)">&#9679;</span>&nbsp;<strong id="sh">0</strong><label>&nbsp;High</label></div>
+    <div class="ss"><span style="color:var(--green)">&#9679;</span>&nbsp;<strong id="sp">0</strong><label>&nbsp;Passed</label></div>
+    <div style="flex:1"></div>
+  </div>
+</main>
+<aside class="right">
+  <div class="rsec">
+    <div class="rtitle">ATTACK COVERAGE</div>
+    <div id="cov"><div class="rempty">Coverage map appears after scan</div></div>
+  </div>
+  <div class="rsec">
+    <div class="rtitle">FIX SUGGESTIONS</div>
+    <div id="fixes"><div class="rempty">Remediation appears after scan</div></div>
+  </div>
+  <div class="rsec" id="bb-sec" style="display:none">
+    <div class="rtitle">BUG BOUNTY REPORT</div>
+    <button class="bsm" style="width:100%;justify-content:center" onclick="copyRep()">&#128203; Copy Report</button>
+  </div>
+  <div class="rsec">
+    <div class="rtitle">LEADERBOARD</div>
+    <div id="lb"><div class="rempty">No scans yet</div></div>
+  </div>
+</aside>
 </div>
 </div>
 <script>
-let isScanning=false,currentResults=[],currentScanId=null;
-document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLeaderboard();validateForm()});
-function validateForm(){
+let scanning=false,results=[],scanId=null;
+document.addEventListener('DOMContentLoaded',()=>{loadStats();loadLB()});
+
+function checkBtn(){
   const url=document.getElementById('target-url').value.trim();
-  document.getElementById('scan-btn').disabled=!url||isScanning;
+  document.getElementById('scan-btn').disabled=!url||scanning;
 }
+
 function toggleAdv(btn){
-  const f=document.getElementById('adv-fields');
+  const f=document.getElementById('adv');
   f.classList.toggle('open');
-  btn.innerHTML=f.classList.contains('open')?'&#9660; &nbsp;&#9881; Advanced settings':'&#9654; &nbsp;&#9881; Advanced settings';
+  btn.innerHTML=f.classList.contains('open')?'&#9660; &#9881; Advanced settings':'&#9654; &#9881; Advanced settings';
 }
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function addLog(type,text){
+  const log=document.getElementById('log');
+  const s=document.createElement('span');
+  s.className='ll '+type;s.textContent=text;
+  log.appendChild(s);log.scrollTop=log.scrollHeight;
+}
+
 async function startScan(){
-  if(isScanning)return;
+  if(scanning)return;
   const url=document.getElementById('target-url').value.trim();
-  const service=document.getElementById('ai-service').value;
   if(!url)return;
-  isScanning=true;currentResults=[];
+  const service=document.getElementById('ai-service').value;
+  const tkey=document.getElementById('target-key').value.trim();
+  const model=document.getElementById('model-ver').value.trim();
+  const company=document.getElementById('company').value.trim();
+
+  scanning=true;results=[];scanId=null;
   document.getElementById('scan-btn').disabled=true;
-  document.getElementById('scan-icon').textContent='⏳';
-  document.getElementById('scan-text').textContent='Scanning…';
-  document.getElementById('empty-state').style.display='none';
-  document.getElementById('vuln-cards').innerHTML='';
-  document.getElementById('vuln-cards').className='vuln-cards';
-  document.getElementById('sum-bar').className='sum-bar';
+  document.getElementById('scan-icon').textContent='&#9203;';
+  document.getElementById('scan-txt').textContent='Scanning…';
+  document.getElementById('empty').style.display='none';
+  document.getElementById('cards').innerHTML='';
+  document.getElementById('cards').className='vcards';
+  document.getElementById('sbar').className='sbar';
   document.getElementById('share-btn').style.display='none';
   document.getElementById('report-btn').style.display='none';
   document.getElementById('bb-sec').style.display='none';
-  document.getElementById('score-display').textContent='0/100';
-  document.getElementById('score-display').className='score';
-  const log=document.getElementById('scan-log');
+  document.getElementById('score').textContent='0/100';
+  document.getElementById('score').className='score';
+  const log=document.getElementById('log');
   log.innerHTML='';log.className='scan-log on';
   addLog('info','> Connecting to '+url);
-  addLog('','> Loading 73 attack modules across 10 categories…');
+  addLog('','> Loading 73 attack modules…');
+
   try{
     const payload={
       target_url:url,
       anthropic_key:'',
       target_name:'Target AI',
       target_description:'AI system under security test',
-      target_type:service||'custom'
+      target_type:service||'custom',
+      target_api_key:tkey||'',
+      target_model:model||''
     };
-    // Step 1: Start scan
-    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!res.ok){
-      const e=await res.json().catch(()=>({detail:'Server error'}));
-      addLog('fail','> Error: '+(e.detail||'Unknown error'));
+    if(company)payload.company_name=company;
+
+    // Step 1: POST to start scan
+    const r1=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r1.ok){
+      const e=await r1.json().catch(()=>({}));
+      addLog('fail','> Failed to start: '+(JSON.stringify(e.detail||e)));
       resetBtn();return;
     }
-    const j=await res.json();
-    const scan_id=j.scan_id;
-    if(!scan_id){addLog('fail','> Error: No scan ID returned');resetBtn();return;}
-    addLog('info','> Scan ID: '+scan_id+' — firing attack chains…');
+    const j=await r1.json();
+    scanId=j.scan_id;
+    if(!scanId){addLog('fail','> No scan ID returned');resetBtn();return;}
+    addLog('info','> Scan '+scanId+' started — streaming results…');
+
     // Step 2: Stream results
-    const streamRes=await fetch('/api/stream/'+scan_id);
-    if(!streamRes.ok){addLog('fail','> Stream error');resetBtn();return;}
-    const reader=streamRes.body.getReader();
+    const r2=await fetch('/api/stream/'+scanId);
+    if(!r2.ok){addLog('fail','> Stream failed');resetBtn();return;}
+    const reader=r2.body.getReader();
     const dec=new TextDecoder();
     let buf='';
     while(true){
@@ -354,16 +325,148 @@ async function startScan(){
       if(done)break;
       buf+=dec.decode(value,{stream:true});
       const lines=buf.split('
-');
-      buf=lines.pop();
+');buf=lines.pop();
       for(const line of lines){
         const t=line.trim();
         if(!t||t==='data: [DONE]')continue;
         const raw=t.startsWith('data: ')?t.slice(6):t;
-        try{handleEvent(JSON.parse(raw));}catch{}
+        try{onEvent(JSON.parse(raw));}catch{}
       }
     }
   }catch(e){addLog('fail','> Error: '+e.message);}
   resetBtn();
 }
->
+
+function onEvent(d){
+  if(!d||!d.type)return;
+  switch(d.type){
+    case 'phase': addLog('info','> '+d.message);break;
+    case 'fingerprint': addLog('','> Model: '+(d.model||'Detected'));break;
+    case 'intel': addLog('info','> '+d.message);break;
+    case 'agent_mode': if(d.message)addLog('','> '+d.message);break;
+    case 'attack_start': addLog('','> ['+d.index+'/'+d.total+'] Testing '+d.name+'...');break;
+    case 'attack_result':
+      results.push(d);
+      if(d.vulnerable){addLog('fail','  VULNERABLE ['+d.owasp_id+'] '+(d.explanation||'').slice(0,80));}
+      else{addLog('ok','  SECURE: '+d.name);}
+      renderCard(d);
+      break;
+    case 'complete': onComplete(d);break;
+    case 'error': addLog('fail','> Error: '+d.message);resetBtn();break;
+    case 'done': case 'keepalive': break;
+  }
+}
+
+function onComplete(d){
+  const score=d.score||0;
+  addLog('info','> Done. Score: '+score+'/100 | '+(d.vulnerabilities||0)+' vulnerabilities found');
+  const sel=document.getElementById('score');
+  sel.textContent=score+'/100';
+  sel.className='score '+(score>=80?'good':score>=60?'med':'bad');
+  setTimeout(()=>{
+    document.getElementById('log').className='scan-log';
+    document.getElementById('cards').className='vcards on';
+    document.getElementById('sbar').className='sbar on';
+  },400);
+  document.getElementById('sc').textContent=d.critical||0;
+  document.getElementById('sh').textContent=d.high||0;
+  document.getElementById('sp').textContent=Math.max(0,results.length-(d.critical||0)-(d.high||0));
+  renderCov();renderFix();
+  if((d.critical||0)>0||(d.high||0)>0)document.getElementById('bb-sec').style.display='block';
+  if(scanId){
+    document.getElementById('share-btn').style.display='flex';
+    const rb=document.getElementById('report-btn');
+    rb.href='/api/report/'+scanId;rb.style.display='flex';
+  }
+  loadStats();loadLB();
+}
+
+function renderCard(r){
+  const rawSev=r.severity||0;
+  const sev=rawSev>=8?'critical':rawSev>=5?'high':rawSev>=3?'medium':'low';
+  const sc=r.vulnerable?sev:'secure';
+  const el=document.createElement('div');
+  el.className='vcard '+sc+' fu';
+  el.innerHTML=
+    '<div class="vhdr" onclick="this.nextElementSibling&&this.nextElementSibling.classList.toggle('open')">'+
+    '<div class="vid">'+(r.owasp_id||'')+'</div>'+
+    '<div class="vname">'+esc(r.name||'Security Test')+'</div>'+
+    '<div class="vsev '+sc+'">'+(r.vulnerable?sev.toUpperCase()+' '+rawSev+'/10':'SECURE')+'</div>'+
+    '</div>'+
+    (r.vulnerable?
+    '<div class="vbody">'+
+    '<div class="vmeta">'+
+    '<div class="vtag">OWASP <span>'+(r.owasp_id||'')+'</span></div>'+
+    '<div class="vtag">MITRE <span>'+(r.mitre_id||'')+'</span></div>'+
+    '<div class="vtag">CVSS <span>'+(r.cvss&&r.cvss.score||rawSev)+'</span></div>'+
+    '</div>'+
+    (r.explanation?'<div class="vdesc">'+esc(r.explanation)+'</div>':'')+
+    '</div>':'');
+  document.getElementById('cards').appendChild(el);
+}
+
+function renderCov(){
+  const cats={};
+  results.forEach(r=>{const id=r.owasp_id||'Other';if(!cats[id])cats[id]={t:0,v:0};cats[id].t++;if(r.vulnerable)cats[id].v++;});
+  if(!Object.keys(cats).length)return;
+  const mx=Math.max(...Object.values(cats).map(c=>c.t),1);
+  document.getElementById('cov').innerHTML=Object.entries(cats).map(([id,c])=>
+    '<div class="cov-row"><div class="cov-id">'+id+'</div><div class="cov-bg"><div class="cov-bar'+(c.v>0?' v':'')+'" style="width:'+Math.round(c.t/mx*100)+'%"></div></div><div class="cov-n">'+c.t+'</div></div>'
+  ).join('');
+}
+
+function renderFix(){
+  const vulns=results.filter(r=>r.vulnerable&&r.explanation);
+  if(!vulns.length)return;
+  document.getElementById('fixes').innerHTML=vulns.slice(0,4).map(r=>
+    '<div class="vfix"><strong style="font-size:10px;display:block;margin-bottom:3px;color:var(--t1)">'+esc(r.name)+'</strong>'+esc(r.explanation.slice(0,200))+'</div>'
+  ).join('');
+}
+
+function resetBtn(){
+  scanning=false;
+  document.getElementById('scan-btn').disabled=false;
+  document.getElementById('scan-icon').textContent='&#128737;';
+  document.getElementById('scan-txt').textContent='Start Security Scan';
+  checkBtn();
+}
+
+async function shareRes(){
+  if(!scanId)return;
+  await navigator.clipboard.writeText(location.origin+'/api/report/'+scanId).catch(()=>{});
+  const b=document.getElementById('share-btn');
+  const o=b.innerHTML;b.innerHTML='&#10003; Copied!';
+  setTimeout(()=>b.innerHTML=o,2000);
+}
+
+function copyRep(){
+  const text=results.filter(r=>r.vulnerable).map(r=>'['+r.owasp_id+'] '+r.name+' - Severity: '+r.severity+'/10
+'+r.explanation+'
+').join('
+');
+  navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+async function loadStats(){
+  try{
+    const r=await fetch('/api/stats');if(!r.ok)return;
+    const d=await r.json();
+    const n=d.total_scans||0;
+    document.getElementById('hdr-scans').innerHTML='<span>'+n+'</span> '+(n===1?'scan':'scans');
+    document.getElementById('hdr-vulns').innerHTML='<span>'+(d.total_vulnerabilities_found||0)+'</span> vulns';
+  }catch{}
+}
+
+async function loadLB(){
+  try{
+    const r=await fetch('/api/leaderboard');if(!r.ok)return;
+    const d=await r.json();
+    if(!d.leaderboard||!d.leaderboard.length)return;
+    document.getElementById('lb').innerHTML=d.leaderboard.slice(0,6).map(s=>
+      '<div class="lb-row"><div class="lb-rank">'+s.rank+'</div><div class="lb-name">'+esc(s.target_name)+'</div><div class="lb-score">'+s.score+'</div></div>'
+    ).join('');
+  }catch{}
+}
+</script>
+</body>
+</html>
