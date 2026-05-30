@@ -336,7 +336,7 @@ async function startScan(){
     if(company)payload.company_name=company;
     if(bblink)payload.bug_bounty_link=bblink;
     const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));addLog('fail','> Error: '+(e.detail||res.statusText));resetBtn();return}
+    if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));addLog('fail','> Error: '+JSON.stringify(e));resetBtn();return}
     const reader=res.body&&res.body.getReader();
     if(reader){
       const dec=new TextDecoder();let buf='';
