@@ -1629,6 +1629,11 @@ async def demo_agent_chat(req: ChatMsg):
 
 # ── API Endpoints ─────────────────────────────────────────────────────────────
 
+@app.get("/scan", response_class=HTMLResponse)
+async def scan_page():
+    with open(os.path.join(os.path.dirname(__file__), "index.html"), encoding="utf-8") as f:
+        return f.read()
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     with open(os.path.join(os.path.dirname(__file__), "index.html"), encoding="utf-8") as f:
