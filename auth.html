@@ -3,113 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ethihack — Sign In</title>
+    <title>ethihack - Sign In</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg-main: #030303;
-            --bg-card: #09090b;
-            --border-subtle: rgba(255,255,255,0.08);
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --accent-indigo: #6366f1;
-            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-main); color: var(--text-secondary); font-family: var(--font-sans); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .ambient { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100vw; height: 100vh; background: radial-gradient(circle 600px at 50% 0%, rgba(99,102,241,0.1), transparent 70%); pointer-events: none; z-index: 0; }
-        .card { position: relative; z-index: 1; width: 100%; max-width: 420px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 40px; }
-        .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
-        .logo-dot { width: 8px; height: 8px; background: var(--accent-indigo); border-radius: 50%; box-shadow: 0 0 10px var(--accent-indigo); }
-        .logo-name { font-size: 18px; font-weight: 600; color: var(--text-primary); }
-        .tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 3px; margin-bottom: 28px; }
-        .tab { flex: 1; text-align: center; padding: 8px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-secondary); transition: all .2s; }
-        .tab.active { background: var(--accent-indigo); color: #fff; }
-        .field { margin-bottom: 16px; }
-        label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-        input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 14px; padding: 10px 14px; border-radius: 8px; outline: none; font-family: var(--font-sans); transition: border-color .2s; }
-        input:focus { border-color: var(--accent-indigo); }
-        input::placeholder { color: rgba(255,255,255,0.2); }
-        .btn { width: 100%; background: var(--accent-indigo); color: #fff; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background .2s; font-family: var(--font-sans); }
-        .btn:hover { background: #4f46e5; }
-        .btn:disabled { opacity: .5; cursor: not-allowed; }
-        .msg { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
-        .msg.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; display: block; }
-        .msg.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #4ade80; display: block; }
-        .divider { text-align: center; font-size: 12px; color: var(--text-secondary); margin: 20px 0; position: relative; }
-        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border-subtle); }
-        .divider::before { left: 0; } .divider::after { right: 0; }
-        .back { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-secondary); }
-        .back a { color: var(--accent-indigo); text-decoration: none; }
+        :root{--bg:#030303;--card:#09090b;--border:rgba(255,255,255,0.08);--text:#fff;--text2:#a1a1aa;--indigo:#6366f1;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:var(--bg);color:var(--text2);font-family:var(--sans);min-height:100vh;display:flex;align-items:center;justify-content:center}
+        .glow{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100vw;height:60vh;background:radial-gradient(ellipse at 50% -10%,rgba(99,102,241,0.12),transparent 70%);pointer-events:none}
+        .card{position:relative;z-index:1;width:100%;max-width:440px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:44px 40px;margin:20px}
+        .logo{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+        .logo-dot{width:8px;height:8px;background:var(--indigo);border-radius:50%;box-shadow:0 0 10px var(--indigo)}
+        .logo-name{font-size:18px;font-weight:600;color:var(--text)}
+        .card-title{font-size:22px;font-weight:600;color:var(--text);margin-bottom:4px}
+        .card-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+        .tabs{display:flex;gap:2px;background:rgba(255,255,255,0.04);border-radius:8px;padding:3px;margin-bottom:20px}
+        .tab{flex:1;text-align:center;padding:8px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s}
+        .tab.active{background:var(--indigo);color:#fff}
+        .social-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+        .social-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 16px;background:transparent;border:1px solid rgba(255,255,255,0.14);border-radius:8px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--sans)}
+        .social-btn:hover{background:rgba(255,255,255,0.04)}
+        .divider{display:flex;align-items:center;gap:12px;margin:16px 0}
+        .div-line{flex:1;height:1px;background:var(--border)}
+        .div-text{font-size:12px;color:var(--text2);white-space:nowrap}
+        .field{margin-bottom:14px}
+        label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+        input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);font-size:14px;padding:10px 14px;border-radius:8px;outline:none;font-family:var(--sans);transition:border-color .2s}
+        input:focus{border-color:var(--indigo)}
+        input::placeholder{color:rgba(255,255,255,0.2)}
+        .btn{width:100%;background:var(--indigo);color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:background .2s;font-family:var(--sans)}
+        .btn:hover{background:#4f46e5}
+        .msg{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+        .msg.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;display:block}
+        .msg.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80;display:block}
+        .footer-link{text-align:center;margin-top:20px;font-size:12px}
+        .footer-link a{color:var(--indigo);text-decoration:none}
     </style>
 </head>
 <body>
-    <div class="ambient"></div>
-    <div class="card">
-        <div class="logo"><div class="logo-dot"></div><span class="logo-name">ethihack</span></div>
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('login')">Sign In</div>
-            <div class="tab" onclick="switchTab('signup')">Create Account</div>
-        </div>
-        <div id="login-form">
-            <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@company.com"></div>
-            <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
-            <button class="btn" onclick="login()">Sign In</button>
-        </div>
-        <div id="signup-form" style="display:none">
-            <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="you@company.com"></div>
-            <div class="field"><label>Password</label><input type="password" id="signup-pass" placeholder="At least 8 characters"></div>
-            <div class="field"><label>Confirm Password</label><input type="password" id="signup-pass2" placeholder="Repeat password"></div>
-            <button class="btn" onclick="signup()">Create Account</button>
-        </div>
-        <div id="msg" class="msg"></div>
-        <div class="divider">or</div>
-        <div class="back"><a href="/">← Back to home</a></div>
+<div class="glow"></div>
+<div class="card">
+    <div class="logo"><div class="logo-dot"></div><span class="logo-name">ethihack</span></div>
+    <div class="card-title" id="card-title">Welcome back</div>
+    <div class="card-sub" id="card-sub">Sign in to continue scanning</div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('login')">Sign In</div>
+        <div class="tab" onclick="switchTab('signup')">Create Account</div>
     </div>
-    <script>
-        const supabase = window.supabase.createClient('https://buaomfmxwbiyaxlzvlmt.supabase.co', 'sb_publishable_W89rHMUJZzdglLVkGOcOZA_6MxxQxnn');
-
-        // If already logged in redirect to scan
-        supabase.auth.getSession().then(({data}) => {
-            if(data.session) window.location.href = '/scan';
-        });
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1)));
-            document.getElementById('login-form').style.display = tab==='login'?'block':'none';
-            document.getElementById('signup-form').style.display = tab==='signup'?'block':'none';
-            document.getElementById('msg').className = 'msg';
-        }
-
-        function showMsg(text, type) {
-            const el = document.getElementById('msg');
-            el.textContent = text;
-            el.className = 'msg ' + type;
-        }
-
-        async function login() {
-            const email = document.getElementById('login-email').value.trim();
-            const pass = document.getElementById('login-pass').value;
-            if(!email||!pass) return showMsg('Please fill in all fields.', 'error');
-            showMsg('Signing in...', 'success');
-            const {error} = await supabase.auth.signInWithPassword({email, password: pass});
-            if(error) return showMsg(error.message, 'error');
-            showMsg('Success! Redirecting...', 'success');
-            setTimeout(() => window.location.href = '/scan', 800);
-        }
-
-        async function signup() {
-            const email = document.getElementById('signup-email').value.trim();
-            const pass = document.getElementById('signup-pass').value;
-            const pass2 = document.getElementById('signup-pass2').value;
-            if(!email||!pass) return showMsg('Please fill in all fields.', 'error');
-            if(pass !== pass2) return showMsg('Passwords do not match.', 'error');
-            if(pass.length < 8) return showMsg('Password must be at least 8 characters.', 'error');
-            showMsg('Creating account...', 'success');
-            const {error} = await supabase.auth.signUp({email, password: pass});
-            if(error) return showMsg(error.message, 'error');
-            showMsg('Account created! Check your email to confirm.', 'success');
-        }
-    </script>
+    <div class="social-btns">
+        <button class="social-btn" onclick="loginWith('google')">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Continue with Google
+        </button>
+        <button class="social-btn" onclick="loginWith('github')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            Continue with GitHub
+        </button>
+        <button class="social-btn" onclick="loginWith('twitter')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Continue with X (Twitter)
+        </button>
+    </div>
+    <div class="divider"><div class="div-line"></div><div class="div-text">or continue with email</div><div class="div-line"></div></div>
+    <div id="login-form">
+        <div class="field"><label>Email address</label><input type="email" id="login-email" placeholder="you@company.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')login()"></div>
+        <button class="btn" onclick="login()">Sign In</button>
+    </div>
+    <div id="signup-form" style="display:none">
+        <div class="field"><label>Email address</label><input type="email" id="signup-email" placeholder="you@company.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="signup-pass" placeholder="At least 8 characters"></div>
+        <div class="field"><label>Confirm Password</label><input type="password" id="signup-pass2" placeholder="Repeat your password" onkeydown="if(event.key==='Enter')signup()"></div>
+        <button class="btn" onclick="signup()">Create Account</button>
+    </div>
+    <div id="msg" class="msg"></div>
+    <div class="footer-link"><a href="/">Back to home</a></div>
+</div>
+<script>
+    const SURL = 'https://buaomfmxwbiyaxlzvlmt.supabase.co';
+    const SKEY = 'sb_publishable_W89rHMUJZzdglLVkGOcOZA_6MxxQxnn';
+    const sb = window.supabase.createClient(SURL, SKEY);
+    sb.auth.getSession().then(({data})=>{if(data.session)window.location.href='/scan';});
+    const savedTab=localStorage.getItem('authTab');
+    if(savedTab){localStorage.removeItem('authTab');switchTab(savedTab);}
+    function switchTab(tab){
+        const isLogin=tab==='login';
+        document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',isLogin?i===0:i===1));
+        document.getElementById('login-form').style.display=isLogin?'block':'none';
+        document.getElementById('signup-form').style.display=isLogin?'none':'block';
+        document.getElementById('card-title').textContent=isLogin?'Welcome back':'Create your account';
+        document.getElementById('card-sub').textContent=isLogin?'Sign in to continue scanning':'Join ethihack and start securing your AI';
+        document.getElementById('msg').className='msg';
+    }
+    function showMsg(text,type){const el=document.getElementById('msg');el.textContent=text;el.className='msg '+type;}
+    async function loginWith(provider){
+        const{error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin+'/scan'}});
+        if(error)showMsg(error.message,'error');
+    }
+    async function login(){
+        const email=document.getElementById('login-email').value.trim();
+        const pass=document.getElementById('login-pass').value;
+        if(!email||!pass)return showMsg('Please fill in all fields.','error');
+        showMsg('Signing in...','success');
+        const{error}=await sb.auth.signInWithPassword({email,password:pass});
+        if(error)return showMsg(error.message,'error');
+        setTimeout(()=>window.location.href='/scan',600);
+    }
+    async function signup(){
+        const email=document.getElementById('signup-email').value.trim();
+        const pass=document.getElementById('signup-pass').value;
+        const pass2=document.getElementById('signup-pass2').value;
+        if(!email||!pass)return showMsg('Please fill in all fields.','error');
+        if(pass!==pass2)return showMsg('Passwords do not match.','error');
+        if(pass.length<8)return showMsg('Password must be at least 8 characters.','error');
+        showMsg('Creating account...','success');
+        const{error}=await sb.auth.signUp({email,password:pass});
+        if(error)return showMsg(error.message,'error');
+        showMsg('Account created! You can now sign in.','success');
+        setTimeout(()=>switchTab('login'),2000);
+    }
+</script>
 </body>
 </html>
