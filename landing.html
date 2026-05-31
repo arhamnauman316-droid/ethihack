@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EthiHack — AI Security Testing</title>
+<meta name="description" content="Is your AI chatbot hackable? Find out in 2 minutes. Free security scan, no signup required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f0ebe3;
+  --cream2:#e8e0d5;
+  --cream3:#ddd4c7;
+  --brown:#2d2520;
+  --brown2:#4a3f38;
+  --orange:#c4622d;
+  --orange2:#e07040;
+  --text:#1a1512;
+  --text2:#6b5d55;
+  --text3:#a09088;
+  --border:#d5cbc0;
+  --border2:#c4b8aa;
+  --serif:'Newsreader',Georgia,serif;
+  --sans:'DM Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--cream);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;
+  background:rgba(240,235,227,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-mark{
+  width:32px;height:32px;
+  background:var(--brown);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cream);font-size:16px;
+}
+.nav-name{
+  font-family:var(--serif);font-size:20px;font-weight:400;
+  color:var(--text);letter-spacing:-.01em;
+}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-link{
+  font-size:14px;color:var(--text2);text-decoration:none;
+  padding:6px 14px;border-radius:6px;transition:all .15s;
+}
+.nav-link:hover{color:var(--text);background:var(--cream2);}
+.nav-cta{
+  background:var(--brown);color:var(--cream);
+  font-size:13px;font-weight:500;
+  padding:9px 20px;border-radius:8px;
+  text-decoration:none;transition:all .15s;
+  margin-left:8px;
+}
+.nav-cta:hover{background:var(--brown2);}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 24px 80px;
+  text-align:center;
+  position:relative;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  color:var(--orange);
+  margin-bottom:28px;
+  opacity:0;animation:fadeUp .6s ease .1s forwards;
+}
+.eyebrow-line{width:32px;height:1px;background:var(--orange);}
+
+.hero-title{
+  font-family:var(--serif);
+  font-size:clamp(56px,9vw,112px);
+  font-weight:300;
+  line-height:.95;
+  letter-spacing:-.03em;
+  color:var(--text);
+  margin-bottom:28px;
+  opacity:0;animation:fadeUp .7s ease .2s forwards;
+}
+.hero-title em{
+  font-style:italic;color:var(--orange);
+}
+
+.hero-sub{
+  font-size:clamp(16px,2vw,19px);
+  color:var(--text2);
+  max-width:480px;
+  margin:0 auto 44px;
+  font-weight:300;
+  line-height:1.65;
+  opacity:0;animation:fadeUp .7s ease .3s forwards;
+}
+
+.hero-actions{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:64px;
+  opacity:0;animation:fadeUp .7s ease .4s forwards;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--brown);color:var(--cream);
+  font-family:var(--sans);font-size:15px;font-weight:500;
+  padding:14px 32px;border-radius:10px;
+  text-decoration:none;transition:all .2s;
+}
+.btn-primary:hover{background:var(--brown2);transform:translateY(-1px);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:6px;
+  background:transparent;color:var(--text2);
+  font-size:14px;padding:14px 20px;border-radius:10px;
+  text-decoration:none;border:1px solid var(--border2);
+  transition:all .15s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);}
+
+.hero-proof{
+  display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;
+  font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.06em;
+  opacity:0;animation:fadeUp .7s ease .5s forwards;
+}
+.proof-item{display:flex;align-items:center;gap:6px;}
+.proof-dot{width:5px;height:5px;border-radius:50%;background:var(--orange);}
+
+/* DEMO CARD */
+.demo-wrap{
+  max-width:640px;margin:0 auto;padding:0 24px;
+  opacity:0;animation:fadeUp .8s ease .6s forwards;
+}
+.demo-card{
+  background:var(--brown);
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 24px 80px rgba(45,37,32,0.2);
+}
+.demo-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:14px 18px;
+  background:rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.db{width:10px;height:10px;border-radius:50%;}
+.db.r{background:#ff5f57;}.db.y{background:#ffbd2e;}.db.g{background:#28c840;}
+.demo-title{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);margin:0 auto;}
+.demo-body{padding:22px 20px;font-family:var(--mono);font-size:12px;line-height:2;}
+.dl{display:block;opacity:0;}
+.dl:nth-child(1){animation:typeIn .3s ease 1.0s forwards}
+.dl:nth-child(2){animation:typeIn .3s ease 1.4s forwards}
+.dl:nth-child(3){animation:typeIn .3s ease 1.8s forwards}
+.dl:nth-child(4){animation:typeIn .3s ease 2.2s forwards}
+.dl:nth-child(5){animation:typeIn .3s ease 2.6s forwards}
+.dl:nth-child(6){animation:typeIn .3s ease 3.0s forwards}
+.dl:nth-child(7){animation:typeIn .3s ease 3.4s forwards}
+.dp{color:rgba(255,255,255,0.4);}
+.dok{color:#4ade80;}
+.dfail{color:#f87171;}
+.dscore{color:#fbbf24;font-size:13px;}
+.ddim{color:rgba(255,255,255,0.25);}
+
+/* STATS */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  max-width:800px;margin:60px auto 0;
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  opacity:0;animation:fadeUp .7s ease .7s forwards;
+}
+.stat{
+  padding:24px 20px;text-align:center;
+  border-right:1px solid var(--border);
+  background:rgba(255,255,255,0.4);
+}
+.stat:last-child{border-right:none;}
+.stat-n{
+  font-family:var(--serif);font-size:42px;font-weight:300;
+  color:var(--text);line-height:1;margin-bottom:4px;
+  letter-spacing:-.02em;
+}
+.stat-l{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;}
+
+/* DIVIDER */
+.divider{
+  width:100%;max-width:1100px;margin:100px auto;
+  height:1px;background:var(--border);
+}
+
+/* SECTION */
+.section{max-width:1100px;margin:0 auto;padding:0 40px 100px;}
+.s-tag{
+  font-family:var(--mono);font-size:10px;color:var(--orange);
+  letter-spacing:.14em;margin-bottom:14px;display:block;
+}
+.s-title{
+  font-family:var(--serif);font-size:clamp(36px,5vw,64px);
+  font-weight:300;line-height:1.05;letter-spacing:-.02em;
+  margin-bottom:16px;
+}
+.s-title em{font-style:italic;color:var(--orange);}
+.s-sub{font-size:16px;color:var(--text2);max-width:480px;font-weight:300;margin-bottom:56px;}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;}
+.step{background:var(--cream);padding:40px 32px;}
+.step:hover{background:var(--cream2);}
+.step-n{
+  font-family:var(--serif);font-size:56px;font-weight:300;
+  color:var(--cream3);line-height:1;margin-bottom:20px;
+}
+.step-icon{font-size:28px;margin-bottom:14px;display:block;}
+.step-t{font-size:17px;font-weight:500;margin-bottom:8px;}
+.step-d{font-size:13px;color:var(--text2);line-height:1.65;}
+
+/* FEATURES */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:0;}
+.feat{
+  background:rgba(255,255,255,0.5);
+  border:1px solid var(--border);border-radius:10px;padding:28px 24px;
+  transition:all .2s;
+}
+.feat:hover{background:rgba(255,255,255,0.8);border-color:var(--border2);}
+.feat-icon{font-size:24px;margin-bottom:14px;display:block;}
+.feat-t{font-size:15px;font-weight:500;margin-bottom:6px;}
+.feat-d{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* OWASP */
+.owasp{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:40px;}
+.ow{
+  background:rgba(255,255,255,0.5);
+  border:1px solid var(--border);border-radius:8px;
+  padding:16px 12px;text-align:center;transition:all .2s;
+}
+.ow:hover{background:rgba(255,255,255,0.8);border-color:var(--orange);transform:translateY(-2px);}
+.ow-id{font-family:var(--mono);font-size:11px;color:var(--orange);font-weight:500;margin-bottom:5px;}
+.ow-n{font-size:10px;color:var(--text2);line-height:1.4;}
+
+/* CTA */
+.cta-section{padding:0 24px 120px;text-align:center;}
+.cta-box{
+  max-width:680px;margin:0 auto;
+  background:var(--brown);
+  border-radius:20px;padding:72px 48px;
+  position:relative;overflow:hidden;
+}
+.cta-box::before{
+  content:'';position:absolute;
+  top:-50%;right:-20%;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(196,98,45,0.3),transparent 70%);
+  pointer-events:none;
+}
+.cta-t{
+  font-family:var(--serif);font-size:clamp(40px,6vw,72px);
+  font-weight:300;letter-spacing:-.02em;line-height:1;
+  color:var(--cream);margin-bottom:16px;
+}
+.cta-t em{font-style:italic;color:var(--orange2);}
+.cta-s{font-size:16px;color:rgba(240,235,227,0.6);margin-bottom:36px;font-weight:300;}
+.btn-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--cream);color:var(--brown);
+  font-size:15px;font-weight:600;
+  padding:16px 40px;border-radius:10px;
+  text-decoration:none;transition:all .2s;
+}
+.btn-cta:hover{background:#fff;transform:translateY(-2px);}
+.cta-fine{
+  margin-top:20px;
+  font-family:var(--mono);font-size:11px;
+  color:rgba(240,235,227,0.3);letter-spacing:.05em;
+}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.f-logo{font-family:var(--serif);font-size:16px;color:var(--text3);}
+.f-links{display:flex;gap:20px;}
+.f-link{font-size:12px;color:var(--text3);text-decoration:none;transition:color .15s;}
+.f-link:hover{color:var(--text2);}
+.f-copy{font-family:var(--mono);font-size:11px;color:var(--text3);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes typeIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .nav-links .nav-link{display:none;}
+  .steps{grid-template-columns:1fr;}
+  .feats{grid-template-columns:1fr;}
+  .owasp{grid-template-columns:repeat(2,1fr);}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .stat:nth-child(2){border-right:none;}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--border);}
+  .section{padding:0 20px 80px;}
+  footer{flex-direction:column;text-align:center;}
+  .cta-box{padding:48px 24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-mark">⚡</div>
+    <span class="nav-name">EthiHack</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how" class="nav-link">How it works</a>
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#coverage" class="nav-link">Coverage</a>
+    <a href="/scan" class="nav-cta">Start Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="eyebrow-line"></span>
+    AI SECURITY TESTING
+    <span class="eyebrow-line"></span>
+  </div>
+
+  <h1 class="hero-title">
+    Is your AI<br>
+    <em>hackable?</em>
+  </h1>
+
+  <p class="hero-sub">
+    EthiHack automatically attacks your AI chatbot the way real hackers do — and tells you exactly what broke, and how to fix it. Free.
+  </p>
+
+  <div class="hero-actions">
+    <a href="/scan" class="btn-primary">
+      ⚡ Test My AI — It's Free
+    </a>
+    <a href="#how" class="btn-ghost">See how it works ↓</a>
+  </div>
+
+  <div class="hero-proof">
+    <span class="proof-item"><span class="proof-dot"></span> NO SETUP NEEDED</span>
+    <span class="proof-item"><span class="proof-dot"></span> RESULTS IN 2 MINUTES</span>
+    <span class="proof-item"><span class="proof-dot"></span> FREE PDF REPORT</span>
+    <span class="proof-item"><span class="proof-dot"></span> NO SIGNUP</span>
+  </div>
+</section>
+
+<!-- DEMO -->
+<div class="demo-wrap">
+  <div class="demo-card">
+    <div class="demo-bar">
+      <div class="db r"></div><div class="db y"></div><div class="db g"></div>
+      <div class="demo-title">EthiHack — Live Scan</div>
+    </div>
+    <div class="demo-body">
+      <span class="dl"><span class="dp">&gt;</span> Connecting to your-chatbot.com...</span>
+      <span class="dl"><span class="dp">&gt;</span> <span class="ddim">Loading 73 attack modules...</span></span>
+      <span class="dl"><span class="dok">✓</span> [LLM01] System Prompt Extraction — <span class="dok">SECURE</span></span>
+      <span class="dl"><span class="dfail">✗</span> [LLM02] Prompt Injection — <span class="dfail">VULNERABLE (8.4/10)</span></span>
+      <span class="dl"><span class="dok">✓</span> [LLM06] Sensitive Data Harvesting — <span class="dok">SECURE</span></span>
+      <span class="dl"><span class="dfail">✗</span> [LLM07] Jailbreak via DAN Injection — <span class="dfail">VULNERABLE (9.1/10)</span></span>
+      <span class="dl"><span class="dscore">&gt; Score: 62/100 · 2 Critical Found · PDF Ready ✓</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div style="padding:0 24px;">
+<div class="stats">
+  <div class="stat"><div class="stat-n">73</div><div class="stat-l">ATTACK TESTS</div></div>
+  <div class="stat"><div class="stat-n">10</div><div class="stat-l">OWASP CATEGORIES</div></div>
+  <div class="stat"><div class="stat-n">2min</div><div class="stat-l">AVERAGE SCAN</div></div>
+  <div class="stat"><div class="stat-n">$0</div><div class="stat-l">TO START</div></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <span class="s-tag">HOW IT WORKS</span>
+  <h2 class="s-title">Three steps.<br><em>Zero setup.</em></h2>
+  <p class="s-sub">No technical knowledge needed. If you have an AI chatbot, you can test it right now.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">01</div>
+      <span class="step-icon">🔗</span>
+      <div class="step-t">Paste your chatbot link</div>
+      <div class="step-d">Any AI chatbot works — ChatGPT bots, Claude apps, custom assistants, or your own API. Just paste the link.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <span class="step-icon">⚡</span>
+      <div class="step-t">We attack it automatically</div>
+      <div class="step-d">73 real attack scenarios fire against your AI — the same techniques real hackers use. Results stream in live.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <span class="step-icon">📋</span>
+      <div class="step-t">Get your security report</div>
+      <div class="step-d">A security score, full list of vulnerabilities with severity ratings, fixes, and a PDF ready to share or submit.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <span class="s-tag">FEATURES</span>
+  <h2 class="s-title">Built for <em>everyone.</em><br>Not just experts.</h2>
+  <p class="s-sub">From solo developers to enterprise security teams — EthiHack works for anyone building with AI.</p>
+
+  <div class="feats">
+    <div class="feat">
+      <span class="feat-icon">🎯</span>
+      <div class="feat-t">Adaptive 3-Turn Attacks</div>
+      <div class="feat-d">Each attack escalates across 3 conversation turns — just like a real hacker who adapts based on your AI's responses.</div>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">📊</span>
+      <div class="feat-t">CVSS Severity Scores</div>
+      <div class="feat-d">Every vulnerability gets an industry-standard CVSS score so you know exactly how serious each issue is.</div>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">📄</span>
+      <div class="feat-t">Auto Bug Bounty PDF</div>
+      <div class="feat-d">One-click PDF report formatted for HackerOne, Bugcrowd, and Intigriti. Ready to submit immediately.</div>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🛡️</span>
+      <div class="feat-t">OWASP LLM + MITRE ATLAS</div>
+      <div class="feat-d">Full coverage of both major AI security frameworks — the same ones used by enterprise security teams worldwide.</div>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🔗</span>
+      <div class="feat-t">Shareable Results</div>
+      <div class="feat-d">Every scan gets a unique link. Share results with your team, clients, or the security community instantly.</div>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">⚡</span>
+      <div class="feat-t">Zero Setup Required</div>
+      <div class="feat-d">No CLI. No installation. No config files. Paste your URL and click one button. Done in under 2 minutes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- OWASP -->
+<section class="section" id="coverage">
+  <span class="s-tag">ATTACK COVERAGE</span>
+  <h2 class="s-title">73 tests across<br><em>10 categories.</em></h2>
+  <p class="s-sub">Complete OWASP LLM Top 10 coverage, plus MITRE ATLAS and NIST AI RMF attack patterns.</p>
+
+  <div class="owasp">
+    <div class="ow"><div class="ow-id">LLM01</div><div class="ow-n">Prompt Injection</div></div>
+    <div class="ow"><div class="ow-id">LLM02</div><div class="ow-n">Insecure Output Handling</div></div>
+    <div class="ow"><div class="ow-id">LLM03</div><div class="ow-n">Training Data Poisoning</div></div>
+    <div class="ow"><div class="ow-id">LLM04</div><div class="ow-n">Model Denial of Service</div></div>
+    <div class="ow"><div class="ow-id">LLM05</div><div class="ow-n">Supply Chain Vulnerabilities</div></div>
+    <div class="ow"><div class="ow-id">LLM06</div><div class="ow-n">Sensitive Info Disclosure</div></div>
+    <div class="ow"><div class="ow-id">LLM07</div><div class="ow-n">Insecure Plugin Design</div></div>
+    <div class="ow"><div class="ow-id">LLM08</div><div class="ow-n">Excessive Agency</div></div>
+    <div class="ow"><div class="ow-id">LLM09</div><div class="ow-n">Overreliance</div></div>
+    <div class="ow"><div class="ow-id">LLM10</div><div class="ow-n">Model Theft</div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-box">
+    <h2 class="cta-t">Test your AI<br><em>before hackers do.</em></h2>
+    <p class="cta-s">Free. No signup. Results in 2 minutes.</p>
+    <a href="/scan" class="btn-cta">⚡ Start Free Security Scan →</a>
+    <div class="cta-fine">BUILT BY ARGUS LABS · OPEN SOURCE · ETHIHACK.NET</div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo">EthiHack by Argus Labs</div>
+  <div class="f-links">
+    <a href="/scan" class="f-link">Launch Tool</a>
+    <a href="https://github.com/arhamnauman316-droid/ethihack" class="f-link" target="_blank">GitHub</a>
+    <a href="#coverage" class="f-link">Coverage</a>
+  </div>
+  <div class="f-copy">© 2026 Argus Labs · Free & Open Source</div>
+</footer>
+
+</body>
+</html>
