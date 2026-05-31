@@ -118,6 +118,19 @@ select option{background:var(--s2)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .fu{animation:fadeUp .25s ease forwards}
 </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+    const _sb = window.supabase.createClient('https://buaomfmxwbiyaxlzvlmt.supabase.co', 'sb_publishable_W89rHMUJZzdglLVkGOcOZA_6MxxQxnn');
+    let _user = null;
+    _sb.auth.getSession().then(({data}) => {
+        if(!data.session) { window.location.href = '/auth'; return; }
+        _user = data.session.user;
+        const nav = document.querySelector('.hstats');
+        if(nav) nav.innerHTML += '<span style="font-size:11px;color:#94a3b8;font-family:monospace;margin-left:12px">' + _user.email + ' <a href="#" onclick="signOut()" style="color:#6366f1;margin-left:6px">Sign out</a></span>';
+    });
+    async function signOut() { await _sb.auth.signOut(); window.location.href = '/'; }
+    </script>
 </head>
 <body>
 <div class="app">
